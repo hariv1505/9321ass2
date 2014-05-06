@@ -47,19 +47,21 @@ public class SearchServlet extends HttpServlet {
 		
 		Integer city = Integer.parseInt(request.getParameter("city"));
 		
-		Integer numBeds = Integer.parseInt(request.getParameter("numBeds"));
+		Integer numRooms = Integer.parseInt(request.getParameter("numRooms"));
+		
+		Integer maxPrice = Integer.parseInt(request.getParameter("maxPrice"));
 		
 		out.println("<H1>Search results for query</H1>"); 
 		
 		HttpSession session = request.getSession(true);
 		SearchRes sr = (SearchRes) session.getAttribute("SearchFlag");
 
-		sr = new SearchRes(cindate, cinmonth, cinyear, coutdate, coutmonth, coutyear, city, numBeds);
+		sr = new SearchRes(cindate, cinmonth, cinyear, coutdate, coutmonth, coutyear, city, numRooms, maxPrice);
 		sr.getSearchResults();
 		
-		//only for testing - format properly for page later
+		//only for testing - TODO: format properly for page later
 		out.println(cindate + " " + cinmonth + " " + cinyear + " " + coutdate + " " + coutmonth + " " + coutyear + " " + 
-				city + " " + numBeds);
+				city + " " + numRooms + " " + maxPrice);
 		
 		if (sr.getRes().keySet().size() > 0) {
 			out.println("<form action='ChoiceServlet' method='POST'><table>");

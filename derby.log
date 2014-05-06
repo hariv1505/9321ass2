@@ -11,3 +11,9 @@ os.arch=amd64
 os.version=3.8.0-38-generic
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Wed May 07 03:49:07 EST 2014: Shutting down Derby engine
+----------------------------------------------------------------
+Wed May 07 03:49:08 EST 2014:
+Shutting down instance a816c00e-0145-d24c-6d0a-000007a79c58 on database directory /home/hari/University/7thYear/COMP9321/Labs/Assignment2/9321ass2 with class loader sun.misc.Launcher$AppClassLoader@55f96302 
+----------------------------------------------------------------

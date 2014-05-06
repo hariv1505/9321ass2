@@ -11,9 +11,10 @@ public class SearchRes {
 	private Integer coutyear;
 	private Integer city;
 	private Integer numBeds;
+	private Integer maxPrice;
 	
 	public SearchRes(int cindate, int cinmonth, int cinyear, int coutdate, int coutmonth, int coutyear,
-			int city, int numBeds) {
+			int city, int numBeds, Integer maxPrice) {
 		rooms = new HashMap<String,Integer>();
 		this.cindate = cindate;
 		this.cinmonth = cinmonth;
@@ -23,6 +24,7 @@ public class SearchRes {
 		this.coutyear = coutyear;
 		this.city = city;
 		this.numBeds = numBeds;
+		this.maxPrice = maxPrice;
 	}
 	
 	public Map<String,Integer> getRes() {
@@ -34,13 +36,13 @@ public class SearchRes {
 	}
 
 	public void getSearchResults() {
-		rooms = this.search(cindate,cinmonth,cinyear,coutdate,coutmonth,coutyear,city,numBeds);
+		rooms = this.search(cindate,cinmonth,cinyear,coutdate,coutmonth,coutyear,city,numBeds,maxPrice);
 		
 	}
 
 	private Map<String, Integer> search(Integer cind, Integer cinm,
 			Integer ciny, Integer coutd, Integer coutm,
-			Integer couty, Integer ct, Integer numBed) {
+			Integer couty, Integer ct, Integer numBed, Integer maxP) {
 		Map<String,Integer> res = new HashMap<String, Integer>();
 		// TODO Auto-generated method stub
 		// do via db queries

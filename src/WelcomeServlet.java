@@ -73,11 +73,12 @@ public class WelcomeServlet extends HttpServlet {
         out.println("<option value='4'>Adelaide</option>");
         out.println("<option value='5'>Hobart</option>");
         out.println("</select><br/><br/>");
-        out.println("<label for='numBeds'>Number of Beds</label><select name='numBeds'>");
+        out.println("<label for='numRooms'>Number of Rooms</label><select name='numRooms'>");
         for (int i = 1; i <= 3; i++) {
     		out.println("<option value='" + i + "'>" + i + "</option>");
     	}
         out.println("</select><br/><br/>");
+        out.println("<label for='maxPrice'>Max Price ($)</label><input type='number' name='maxPrice'><br/><br/>");
         out.println("<input type='submit' value='Submit'></form>");
     	out.println("</CENTER>");
     	out.println("</BODY>");
