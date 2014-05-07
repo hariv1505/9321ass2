@@ -1,0 +1,6 @@
+//for all results from initial search
+"SELECT * FROM BOOKINGS b JOIN ROOMS r on (r.ID=b.ROOMID) "
+"WHERE r.PRICE <=" + maxP + " AND " +
+"b.CHECKIN <" cInToMS " AND " +
+"b.CHECKOUT >" + cOutToMS + " AND " +
+"b.CITYID = " + ct + ";"

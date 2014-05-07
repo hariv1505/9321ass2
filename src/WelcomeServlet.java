@@ -23,7 +23,6 @@ public class WelcomeServlet extends HttpServlet {
      */
     public WelcomeServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
@@ -46,7 +45,8 @@ public class WelcomeServlet extends HttpServlet {
     	out.println("<BODY>"); 
     	out.println("<CENTER>");
     	out.println("<H1>Search for a room!</H1>"); 
-    	 
+    	
+		//TODO need to verify input
     	out.println("<FORM ACTION='SearchServlet' METHOD='POST'>"); 
     	out.println("<label for='checkin'>Check In</label><div name='checkin'><select name='cindate'>");
     	for (int i = 1; i <= 31; i++) {
@@ -85,7 +85,6 @@ public class WelcomeServlet extends HttpServlet {
     	out.println("</HTML>");
     	out.close();
     	
-    	/*TODO: validation*/
 	}
 
 }

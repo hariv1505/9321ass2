@@ -1,6 +1,4 @@
 
-
-
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -64,7 +62,7 @@ public class SearchServlet extends HttpServlet {
 				city + " " + numRooms + " " + maxPrice);
 		
 		if (sr.getRes().keySet().size() > 0) {
-			out.println("<form action='ChoiceServlet' method='POST'><table>");
+			out.println("<form action='CheckoutServlet' method='POST'><table>");
 			
 			out.println("<tr>" +
 						"<td><b>Type<b></td>" +
@@ -78,16 +76,24 @@ public class SearchServlet extends HttpServlet {
 				"<td>" + /*TODO +*/ "</td>"	+ "<td>" + sr.getRes().get(type) + "</td>" +
 				"<td>" + "<input type='checkbox' name='toBook' value='" + type + "' />" +"</td>");
 				out.println("</tr>");
+				//TODO: checkbox or radio? what if he orders 10 people? need more tha one room...
+				/*if number of beds + 1 <= room's number of beds
+					out.println("<tr>");
+					out.println("<td>" + type + "</td>" + "<td>" + (TODO + 1) + "</td>" + 
+					"<td>" + (TODO + 35) + "</td>"	+ "<td>" + sr.getRes().get(type) + "</td>" +
+					"<td>" + "<input type='checkbox' name='toBook' value='" + type + "' />" +"</td>");
+					out.println("</tr>");
+				*/
 			}
 					
 			out.println("</table>");
 			out.println("<br><input type='submit'  name='ChoiceSubmit' value='Book!'>");
-			out.println("</form>");
+			out.println("</form><br/>");
 		} else {
-			out.println("No available rooms. Please try again with a different query. Thank you, and"
-					+ "sorry for the inconvenience.");
+			out.println("<br/>No available rooms. Please try again with a different query. Thank you, and "
+					+ "sorry for the inconvenience.<br/>");
 		}
-		out.println("<form action='/Assignment2'>" + 
+		out.println("<br/><form action='/Assignment2'>" + 
 				"<input type='submit' value='Back to Search'></form>");
 		
 		out.println("</CENTER>");
