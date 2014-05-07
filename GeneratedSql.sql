@@ -85,5 +85,5 @@ VALUES ('Single',1,70),
 ('Executive',1,180),
 ('Executive',1,180),
 ('Executive',1,180),
-('Suite',2,300);
+('Suite',2,300),
 ('Suite',2,300);
