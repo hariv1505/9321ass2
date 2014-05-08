@@ -1,6 +1,11 @@
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+
+import javafx.scene.chart.PieChart.Data;
 
 public class SearchRes {
 	private Map<String,Integer> rooms;
@@ -52,14 +57,23 @@ public class SearchRes {
 		cOut.set(couty, coutm, coutd);
 		long cOutToMS = cOut.getTimeInMillis();
 		
-		String qry = "SELECT COUNT(*) FROM BOOKINGS b JOIN ROOMS r on (r.ID=b.ROOMID) " +
+		String qry = "SELECT r.TYPE, COUNT(r.TYPE) FROM BOOKINGS b JOIN ROOMS r on (r.ID=b.ROOMID) " +
 				"WHERE r.PRICE <=" + maxP + " AND " +
 				"b.CHECKIN <" + cInToMS + " AND " +
 				"b.CHECKOUT >" + cOutToMS + " AND " +
 				"b.CITYID = " + ct + " " +
 				"GROUP BY r.TYPE;";
-		
-		//TODO: run qry and store as "Single" -> total-..., "Queen" -> total-..., etc etc in res
+		try{
+			Connection con = DatabaseHandle.GetDbConnection();
+			PreparedStatement ps = con.prepareStatement(qry);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				
+			}
+			//TODO: run qry and store as "Single" -> total-..., "Queen" -> total-..., etc etc in res
+		} catch (Exception e) {
+			
+		}
 		
 		return res;
 	}

@@ -32,9 +32,7 @@ public class EditBooking extends HttpServlet {
 		response.setContentType("text/html");
 		
 		HttpSession session = request.getSession(true);
-		Integer bookingID = (Integer) request.getAttribute("bookingID");
-		
-		Boolean okLogin = (Boolean) session.getAttribute("okLogin");
+		Integer bookingID = Integer.parseInt(request.getParameter("bookingID"));
 		session.setAttribute("bookingID", bookingID);
 		
 		PrintWriter out = response.getWriter();
@@ -42,31 +40,10 @@ public class EditBooking extends HttpServlet {
 		out.println("<BODY>"); 
 		out.println("<CENTER>");
 		
-		if (bookingID != null && (okLogin != null && okLogin)) {
-			bookingID = Integer.parseInt(request.getParameter("bookingID"));
-			String qry = "SELECT * FROM BOOKINGS "
-					+ "WHERE ID = " + bookingID + ";";
-			//TODO: get from qry
-			long checkIn = 0;
-			
-			if (Calendar.getInstance().getTimeInMillis() + (48*24*60*60*1000) < checkIn) {
-				//TODO: fill out password. if password is correct then...
-				
-				//TODO: use query to fill out form with appropriate values
-				
-				//TODO: send back to controller. Controller will delete record and add new record
-				
-				//TODO: else, if password is incorrect, re-load page with error message
-			} else {
-				out.println("<h1>Sorry, you can only edit the page 48 hours prior to booking start.</h1>");
-			}
-		} else {
-			out.println("<form method='post' action=CheckServlet>");
-			out.println("<label for='PIN'>PIN</label><input type='number' name='PIN' />");
-			out.println("</form>");
-			if (okLogin != null) out.println("<br/><br/>Incorrect password");
-		}
-		
+		out.println("<form method='post' action=EditServlet>");
+		out.println("<label for='PIN'>PIN</label><input type='number' name='PIN' />");
+		out.println("</form>");
+
 		out.println("</CENTER>");
 		out.println("</BODY>"); 
 		out.println("</HTML>");
@@ -77,6 +54,44 @@ public class EditBooking extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		Integer bookingID = (Integer) request.getAttribute("bookingID");
+		Integer pin = Integer.parseInt(request.getParameter("bookingID"));
+		
+		String qry = "SELECT * FROM BOOKINGS "
+				+ "WHERE ID = " + bookingID + ";";
+		
+		//TODO: get PIN
+		Integer savedPin = 0;
+		boolean okLogin = (pin == savedPin);
+
+		PrintWriter out = response.getWriter();
+		out.println("<HTML>"); 
+		out.println("<BODY>"); 
+		out.println("<CENTER>");
+		
+		if (okLogin) {
+			//TODO: get from qry
+			long checkIn = 0;
+		
+			if (Calendar.getInstance().getTimeInMillis() + (48*24*60*60*1000) < checkIn) {
+				//TODO: use query to fill out form with appropriate values
+				
+				//TODO: send back to controller. Controller will delete record and add new record				
+			} else {
+				out.println("<h1>Sorry, you can only edit the page 48 hours prior to booking start.</h1>");
+			}
+		} else {
+			out.println("<form method='post' action=EditServlet>");
+			out.println("<label for='PIN'>PIN</label><input type='number' name='PIN' />");
+			out.println("</form>");
+			out.println("<br/><br/>Incorrect password");
+		}
+		
+		out.println("</CENTER>");
+		out.println("</BODY>"); 
+		out.println("</HTML>");
+		out.close();
+		
 	}
 
 }

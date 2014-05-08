@@ -61,10 +61,10 @@ public class SearchServlet extends HttpServlet {
 		
 		//just in case booking is requested...
 		Calendar cIn = Calendar.getInstance();
-		cIn.set(cinyear, cinmonth, cindate);
+		cIn.set(cinyear, cinmonth-1, cindate,0,0,0);
 		long cInToMS = cIn.getTimeInMillis(); 
 		Calendar cOut = Calendar.getInstance();
-		cOut.set(coutyear, coutmonth, coutdate);
+		cOut.set(coutyear, coutmonth-1, coutdate,0,0,0);
 		long cOutToMS = cOut.getTimeInMillis();
 		BookingRequest b = new BookingRequest(cInToMS, cOutToMS, city);
 		session.setAttribute("BookingReq", b);

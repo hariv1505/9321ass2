@@ -4,11 +4,11 @@ import java.sql.SQLException;
 
 
 public class DatabaseHandle {
-	private static Connection GetDbConnection() {
-		//
+	public static Connection GetDbConnection() {
+		
 		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
         String dbName="jdbcDemoDB";
-        String connectionURL = "jdbc:derby:C:/ClientPosts2";
+        String connectionURL = "jdbc:derby:9321ass2";
         Connection conn = null;
 
         // Load the driver
@@ -35,7 +35,7 @@ public class DatabaseHandle {
 		//
 	}
 		
-	private static void CloseDbConnection(Connection conn) {
+	public static void CloseDbConnection(Connection conn) {
 		try {// shut down the database
             conn.close();
             System.out.println("Closed connection");

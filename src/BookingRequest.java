@@ -1,4 +1,6 @@
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class BookingRequest {
@@ -10,14 +12,62 @@ public class BookingRequest {
 	private long checkOut;
 	private int city;
 	private int type;
+	private Map<Long, Long> peakPeriods;
 	
 	
 	public BookingRequest(long checkIn, long checkOut, int city) {
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
 		this.city = city;
+		this.setPeakPeriods();
 	}
 	
+	private void setPeakPeriods() {
+		peakPeriods = new HashMap<Long, Long>();
+		Calendar start = Calendar.getInstance();
+		start.setTimeInMillis(checkIn);
+		int startYear = start.get(Calendar.YEAR);
+		Calendar end = Calendar.getInstance();
+		end.setTimeInMillis(checkOut);
+		int endYear = start.get(Calendar.YEAR);
+		
+		for (int i = startYear; i <= endYear; i++) {
+			Calendar c = Calendar.getInstance();
+			c.set(Calendar.MILLISECOND, 0);
+			
+			c.set(i, 0, 0, 0, 0, 0);
+			Long k = c.getTimeInMillis();
+			c.set(i, 1, 15, 23, 59, 59);
+			Long v = c.getTimeInMillis();
+			peakPeriods.put(k, v);
+			
+			c.set(i, 2, 25, 0, 0, 0);
+			k = c.getTimeInMillis();
+			c.set(i, 3, 15, 14, 59, 59);
+			v = c.getTimeInMillis();
+			peakPeriods.put(k, v);
+			
+			c.set(i, 6, 1, 0, 0, 0);
+			k = c.getTimeInMillis();
+			c.set(i, 6, 20, 23, 59, 59);
+			v = c.getTimeInMillis();
+			peakPeriods.put(k, v);
+			
+			c.set(i, 8, 20, 0, 0, 0);
+			k = c.getTimeInMillis();
+			c.set(i, 9, 10, 23, 59, 59);
+			v = c.getTimeInMillis();
+			peakPeriods.put(k, v);
+			
+			c.set(i, 11, 15, 0, 0, 0);
+			k = c.getTimeInMillis();
+			c.set(i, 11, 31, 23, 59, 59);
+			v = c.getTimeInMillis();
+			peakPeriods.put(k, v);
+		}
+		
+	}
+
 	public void setRest(String roomToBook) {
 		String[] roomToBookDetails = roomToBook.split(";");
 		if (roomToBookDetails[1] == "Y") isExtraRoom = true;
@@ -62,11 +112,13 @@ public class BookingRequest {
 	}
 
 	private boolean isAllInPeak() {
+		String peakDateQry = "SELECT * FROM DISCOUNTS;";
 		// TODO are all dates in peak?
 		return false;
 	}
 	
 	private static boolean isAllInPeak(long checkin, long checkout) {
+		String peakDateQry = "SELECT * FROM DISCOUNTS;";
 		// TODO are all dates in peak?
 		return false;
 	}
@@ -112,7 +164,7 @@ public class BookingRequest {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(checkIn);
 		
-		return cal.get(Calendar.DATE) + "/" + cal.get(Calendar.MONTH) + "/" + cal.get(Calendar.YEAR);
+		return cal.get(Calendar.DATE) + "/" + cal.get(Calendar.MONTH)+1 + "/" + cal.get(Calendar.YEAR);
 	}
 
 	public String getCheckOutToString() {
