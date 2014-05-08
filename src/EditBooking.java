@@ -101,6 +101,7 @@ public class EditBooking extends HttpServlet {
 			out.println("</BODY>"); 
 			out.println("</HTML>");
 			out.close();
+			DatabaseHandle.CloseDbConnection(con);
 		}
 	}
 

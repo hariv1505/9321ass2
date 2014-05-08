@@ -55,16 +55,17 @@ public class SearchRes {
 		cOut.set(couty, coutm, coutd);
 		long cOutToMS = cOut.getTimeInMillis();
 		
-		String qry = "SELECT r.TYPE, COUNT(r.TYPE) FROM BOOKINGS b JOIN ROOMS r on (r.ID=b.ROOMID) " +
+		String qry = "SELECT r.TYPE, COUNT(*) FROM BOOKINGS b JOIN ROOMS r on (r.ID=b.ROOMID) " +
 				"WHERE r.PRICE <=" + maxP + " AND " +
 				"b.CHECKIN <" + cInToMS + " AND " +
 				"b.CHECKOUT >" + cOutToMS + " AND " +
-				"b.CITYID = " + ct + " " +
-				"GROUP BY r.TYPE;";
+				"b.CITYID = " + ct + " GROUP BY r.TYPE";
 		String allRoomsQry = "SELECT r.TYPE, COUNT(*) FROM ROOMS r"
-				+ " GROUP BY r.TYPE;";
+				+ " GROUP BY r.TYPE";
+		
+		Connection con = DatabaseHandle.GetDbConnection();
+		
 		try{
-			Connection con = DatabaseHandle.GetDbConnection();
 			PreparedStatement ps = con.prepareStatement(qry);
 			ResultSet rs = ps.executeQuery();
 			ps = con.prepareStatement(allRoomsQry);
@@ -74,6 +75,7 @@ public class SearchRes {
 						- Integer.parseInt(rs.getString("COUNT")));
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		return res;

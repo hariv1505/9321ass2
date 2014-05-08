@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.scene.chart.PieChart.Data;
+
 
 public class BookingRequest {
 	private boolean isExtraBed = false;
@@ -84,8 +86,8 @@ public class BookingRequest {
 		
 		String roomQry = "SELECT * FROM ROOMS "
 				+ "WHERE TYPE = " + type + ";";
+		Connection con = DatabaseHandle.GetDbConnection();
 		try {
-			Connection con = DatabaseHandle.GetDbConnection();
 			PreparedStatement ps = con.prepareStatement(roomQry);
 			ResultSet rs = ps.executeQuery();
 			rs.next();
@@ -95,6 +97,7 @@ public class BookingRequest {
 			price = 0;
 			numBeds = 0;
 		}
+		DatabaseHandle.CloseDbConnection(con);
 		
 		this.setNumRooms(numRooms);
 		

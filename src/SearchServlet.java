@@ -74,6 +74,7 @@ public class SearchServlet extends HttpServlet {
 		long cOutToMS = cOut.getTimeInMillis();
 		BookingRequest b = new BookingRequest(cInToMS, cOutToMS, city);
 		session.setAttribute("BookingReq", b);
+		out.println(cInToMS + " " + cOutToMS);
 		
 		out.println("<b>City: </b> " + city + "<br/>");
 		out.println("<b>Number of rooms: </b> " + numRooms + "<br/>");
@@ -81,7 +82,7 @@ public class SearchServlet extends HttpServlet {
 		out.println("<b>Check-in: </b> "+ b.getCheckInToString() + "<br/>");
 		out.println("<b>Check-out: </b> "+ b.getCheckOutToString() + "<br/>");
 		
-		if (sr.getRes().keySet().size() > 0) {
+		//if (sr.getRes().keySet().size() > 0) {
 			out.println("<form action='CheckoutServlet' method='POST'><table>");
 			
 			out.println("<tr>" +
@@ -94,7 +95,7 @@ public class SearchServlet extends HttpServlet {
 						
 			Map<String, Integer> prices = new HashMap<String, Integer>();
 			Map<String, Integer> numberOfBeds = new HashMap<String, Integer>();
-			String searchQry = "SELECT * FROM ROOMS;";
+			String searchQry = "SELECT * FROM ROOMS";
 			Connection con = DatabaseHandle.GetDbConnection();
 			try {
 				PreparedStatement ps = con.prepareStatement(searchQry);
@@ -151,13 +152,13 @@ public class SearchServlet extends HttpServlet {
 			}  catch (SQLException e) {
 				out.println("Cannot connect to database.");
 			}
-			
-		} else {
-				out.println("<br/>No available rooms. Please try again with a different query. Thank you, and "
-						+ "sorry for the inconvenience.<br/>");
-				out.println("<br/><form action='/Assignment2'>" + 
-						"<input type='submit' value='Back to Search'></form>");
-			}
+			DatabaseHandle.CloseDbConnection(con);
+		/*} else {
+			out.println("<br/>No available rooms. Please try again with a different query. Thank you, and "
+					+ "sorry for the inconvenience.<br/>");
+			out.println("<br/><form action='/Assignment2'>" + 
+					"<input type='submit' value='Back to Search'></form>");
+		}*/
 		
 		out.println("</CENTER>");
 		out.println("</BODY>"); 
