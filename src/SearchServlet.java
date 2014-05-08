@@ -1,7 +1,13 @@
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -85,57 +91,73 @@ public class SearchServlet extends HttpServlet {
 						"<td><b>Number of rooms required</b></td>" +
 						"<td><b>Number of rooms remaining</b></td>" +
 						"<td><b>Select?</b></td></tr>");
-			for (String type : sr.getRes().keySet()) {
-				//if ((TODO: price) < price) {
-					out.println("<tr>");
-					out.println("<td>" + type + "</td>" + "<td>" + /*TODO +*/ "</td>" + 
-					"<td>" + /*BookingRequest.pricePerNight(TODO) +*/ "</td>"	+ "<td>" + numRooms + "</td>" +
-					"<td>" + sr.getRes().get(type) + "</td><td>");
-					if (sr.getRes().get(type) > numRooms) {
-						foundOption = true;
-						out.println("<input type='radio' name='toBook' value='" + type + ";N" + "' />");
-					}
-
-					if (type != "Single") {
-						out.println("</td></tr>");
+						
+			Map<String, Integer> prices = new HashMap<String, Integer>();
+			Map<String, Integer> numberOfBeds = new HashMap<String, Integer>();
+			String searchQry = "SELECT * FROM ROOMS;";
+			Connection con = DatabaseHandle.GetDbConnection();
+			try {
+				PreparedStatement ps = con.prepareStatement(searchQry);
+				ResultSet rs = ps.executeQuery();
+				while (rs.next()) {
+					prices.put(rs.getString("TYPE"),Integer.parseInt(rs.getString("PRICE")));
+					prices.put(rs.getString("TYPE"),Integer.parseInt(rs.getString("NUMBEDS")));
+				}
+				
+				for (String type : sr.getRes().keySet()) {
+					if (prices.get(type) < maxPrice) {
 						out.println("<tr>");
-						out.println("<td>" + type + "</td>" + "<td>" + /*TODO + 1 +*/ "</td>" + 
-								"<td>" + /*BookingRequest.pricePerNight(TODO) + 35 +*/ "</td>" + "<td>" + numRooms + "</td>" +
+						out.println("<td>" + type + "</td>" + "<td>" + numberOfBeds.get(type) + "</td>" + 
+								"<td>" + prices.get(type) + "</td>"	+ "<td>" + numRooms + "</td>" +	
 								"<td>" + sr.getRes().get(type) + "</td><td>");
-						if (sr.getRes().get(type) > 0) {
+						if (sr.getRes().get(type) > numRooms) {
 							foundOption = true;
-							out.println("<input type='radio' name='toBook' value='" + type + ";Y" + "' />");
+							out.println("<input type='radio' name='toBook' value='" + type + ";N" + "' />");
 						}
-						out.println("</td></tr>");
+	
+						if (type != "Single") {
+							out.println("</td></tr>");
+							out.println("<tr>");
+							out.println("<td>" + type + "</td>" + "<td>" + numberOfBeds.get(type) + 1 + "</td>" + 
+									"<td>" + prices.get(type) + 35 + "</td>" + "<td>" + numRooms + "</td>" +
+									"<td>" + sr.getRes().get(type) + "</td><td>");
+							if (sr.getRes().get(type) > 0) {
+								foundOption = true;
+								out.println("<input type='radio' name='toBook' value='" + type + ";Y" + "' />");
+							}
+							out.println("</td></tr>");
+						}
+	
+						out.println("<tr></tr>");
 					}
-
-					out.println("<tr></tr>");
-				//}
+				}
+				
+				out.println("</table>");
+				out.println("<br/>Note: prices may change upon confirmation to account for peak-hour timing<br/>");
+				
+				
+				if (!foundOption) {
+					out.println("<br/>No available rooms. Please try again with a different query. Thank you, and "
+							+ "sorry for the inconvenience.<br/>");
+				} else {
+					out.println("<br><input type='submit'  name='ChoiceSubmit' value='Book!'>");
+				}
+				
+				out.println("</form><br/>");
+				
+				out.println("<br/><form action='/Assignment2'>" + 
+						"<input type='submit' value='Back to Search'></form>");
+				
+			}  catch (SQLException e) {
+				out.println("Cannot connect to database.");
 			}
-			
-			out.println("</table>");
-			out.println("<br/>Note: prices may change upon confirmation to account for peak-hour timing<br/>");
-			
-			
-			if (!foundOption) {
-				out.println("<br/>No available rooms. Please try again with a different query. Thank you, and "
-						+ "sorry for the inconvenience.<br/>");
-			} else {
-				out.println("<br><input type='submit'  name='ChoiceSubmit' value='Book!'>");
-			}
-			
-			out.println("</form><br/>");
-			
-			out.println("<br/><form action='/Assignment2'>" + 
-					"<input type='submit' value='Back to Search'></form>");
 			
 		} else {
-			out.println("<br/>No available rooms. Please try again with a different query. Thank you, and "
-					+ "sorry for the inconvenience.<br/>");
-			out.println("<br/><form action='/Assignment2'>" + 
-					"<input type='submit' value='Back to Search'></form>");
-		}
-		
+				out.println("<br/>No available rooms. Please try again with a different query. Thank you, and "
+						+ "sorry for the inconvenience.<br/>");
+				out.println("<br/><form action='/Assignment2'>" + 
+						"<input type='submit' value='Back to Search'></form>");
+			}
 		
 		out.println("</CENTER>");
 		out.println("</BODY>"); 

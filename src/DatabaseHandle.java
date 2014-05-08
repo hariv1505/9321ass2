@@ -7,7 +7,6 @@ public class DatabaseHandle {
 	public static Connection GetDbConnection() {
 		
 		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
-        String dbName="jdbcDemoDB";
         String connectionURL = "jdbc:derby:9321ass2";
         Connection conn = null;
 

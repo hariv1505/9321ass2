@@ -54,7 +54,7 @@ public class BookingServlet extends HttpServlet {
 		out.println("<br/><b>City:</b> " + b.getCity() + "<br/>");
 		out.println("<b>Number of beds:</b> " + b.getNumBeds() + "<br/>");
 		out.println("<b>Number of rooms:</b> " + b.getNumRooms() + "<br/>");
-		out.println("<b>Price per night:</b> "+ b.getPrice() + "<br/>");
+		out.println("<b>Price per night:</b> "+ b.getPricePerNight() + "<br/>");
 		out.println("<b>Check-in:</b> "+ b.getCheckInToString() + "<br/>");
 		out.println("<b>Check-out:</b> "+ b.getCheckOutToString() + "<br/>");
 		out.println("<b>Total Price:</b> <u>"+ b.getTotalPrice() +"</u><br/><br/>");

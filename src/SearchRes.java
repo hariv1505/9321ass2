@@ -5,8 +5,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import javafx.scene.chart.PieChart.Data;
-
 public class SearchRes {
 	private Map<String,Integer> rooms;
 	private Integer cindate;
@@ -63,16 +61,19 @@ public class SearchRes {
 				"b.CHECKOUT >" + cOutToMS + " AND " +
 				"b.CITYID = " + ct + " " +
 				"GROUP BY r.TYPE;";
+		String allRoomsQry = "SELECT r.TYPE, COUNT(*) FROM ROOMS r"
+				+ " GROUP BY r.TYPE;";
 		try{
 			Connection con = DatabaseHandle.GetDbConnection();
 			PreparedStatement ps = con.prepareStatement(qry);
 			ResultSet rs = ps.executeQuery();
+			ps = con.prepareStatement(allRoomsQry);
+			ResultSet rsAll = ps.executeQuery();
 			while (rs.next()) {
-				
+				rooms.put(rs.getString("TYPE"), Integer.parseInt(rsAll.getString("COUNT"))
+						- Integer.parseInt(rs.getString("COUNT")));
 			}
-			//TODO: run qry and store as "Single" -> total-..., "Queen" -> total-..., etc etc in res
 		} catch (Exception e) {
-			
 		}
 		
 		return res;

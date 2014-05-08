@@ -1,10 +1,14 @@
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class BookingRequest {
-	private boolean isExtraRoom = false;
+	private boolean isExtraBed = false;
 	private int numBeds;
 	private int numRooms;
 	private int price;
@@ -12,6 +16,7 @@ public class BookingRequest {
 	private long checkOut;
 	private int city;
 	private int type;
+	public static Map<Long, Long> publicPeakPeriods;
 	private Map<Long, Long> peakPeriods;
 	
 	
@@ -66,62 +71,51 @@ public class BookingRequest {
 			peakPeriods.put(k, v);
 		}
 		
+		publicPeakPeriods = peakPeriods;
+		
 	}
 
 	public void setRest(String roomToBook) {
 		String[] roomToBookDetails = roomToBook.split(";");
-		if (roomToBookDetails[1] == "Y") isExtraRoom = true;
+		if (roomToBookDetails[1] == "Y") isExtraBed = true;
 		String type = roomToBookDetails[0];
 		
 		numRooms = Integer.parseInt(roomToBookDetails[2]);
 		
 		String roomQry = "SELECT * FROM ROOMS "
 				+ "WHERE TYPE = " + type + ";";
+		try {
+			Connection con = DatabaseHandle.GetDbConnection();
+			PreparedStatement ps = con.prepareStatement(roomQry);
+			ResultSet rs = ps.executeQuery();
+			rs.next();
+			price = Integer.parseInt(rs.getString("PRICE"));
+			numBeds = Integer.parseInt(rs.getString("NUMBEDS"));
+		} catch (SQLException e) {
+			price = 0;
+			numBeds = 0;
+		}
 		
-		price = 0; //TODO: determine from roomQry
-		numBeds = 0; //TODO: determine from roomQry
 		this.setNumRooms(numRooms);
 		
-		if (this.isExtraRoom()) {
-			price += 35;
+		if (this.isExtraBed()) {
 			numBeds++;
 		}
 		
 	}
 	
-	public boolean isExtraRoom() {
-		return isExtraRoom;
+	public boolean isExtraBed() {
+		return isExtraBed;
 	}
 
 	public Integer getNumBeds() {
 		return numBeds;
 	}
 
-	public Double getPrice() {
-		Double ans = (double) price;
-		if (this.isAllInPeak())
-			ans *= 1.4;
-		return ans;
+	public int getPricePerNight() {
+		return price;
 	}
 	
-	public static Double pricePerNight(int price, long checkin, long checkout) {
-		Double ans = (double) price;
-		if (BookingRequest.isAllInPeak(checkin, checkout))
-			ans *= 1.4;
-		return ans;
-	}
-
-	private boolean isAllInPeak() {
-		String peakDateQry = "SELECT * FROM DISCOUNTS;";
-		// TODO are all dates in peak?
-		return false;
-	}
-	
-	private static boolean isAllInPeak(long checkin, long checkout) {
-		String peakDateQry = "SELECT * FROM DISCOUNTS;";
-		// TODO are all dates in peak?
-		return false;
-	}
 
 	public void setNumBeds(int numBeds) {
 		this.numBeds = numBeds;
@@ -174,14 +168,43 @@ public class BookingRequest {
 		return cal.get(Calendar.DATE) + "/" + cal.get(Calendar.MONTH) + "/" + cal.get(Calendar.YEAR);
 	}
 	
-	public int getTotalPrice() {
-		return numRooms * price * this.getNumNights(); //TODO: account for number of peak hours, etc
+	public double getTotalPrice() {
+		double ans = 0;
+		
+		for (long i = checkIn; i <= checkOut; i++) {
+			for (long start : peakPeriods.values()) {
+				if (start > i) {
+					ans += price;
+					if (isExtraBed)  ans += 35;
+					break;
+				} else {
+					if (peakPeriods.get(start) > i) {
+						ans += price*1.4;
+						if (isExtraBed)  ans += 35;
+						break;
+					}
+				}
+			}
+		}
+		return ans;
 	}
 	
-	public static int getTotalPrice(int p, long cin, long cout, int numR) {
-		String peakQry = "SELECT * FROM DISCOUNT;";
-		return numR * p * (int)(cout - cin)/(24*60*60*1000);//TODO: account for number of peak hours, etc
-		
+	public static double getTotalPrice(int p, long cin, long cout, int numR) {
+		double ans = 0;
+		for (long i = cin; i <= cout; i++) {
+			for (long start : publicPeakPeriods.values()) {
+				if (start > i) {
+					ans += p;
+					break;
+				} else {
+					if (publicPeakPeriods.get(start) > i) {
+						ans += p*1.4;
+						break;
+					}
+				}
+			}
+		}
+		return ans;
 	}
 
 	public int getCity() {
