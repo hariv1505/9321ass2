@@ -19,7 +19,6 @@ public class EditBooking extends HttpServlet {
      */
     public EditBooking() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
@@ -41,7 +40,6 @@ public class EditBooking extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 	}
 
 }

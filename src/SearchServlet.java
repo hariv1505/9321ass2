@@ -1,6 +1,7 @@
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Calendar;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,13 +22,15 @@ public class SearchServlet extends HttpServlet {
      */
     public SearchServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		HttpSession session = request.getSession(true);
+		
 		response.setContentType("text/html"); 
 		PrintWriter out = response.getWriter();
 		out.println("<HTML>"); 
@@ -49,52 +52,90 @@ public class SearchServlet extends HttpServlet {
 		
 		Integer maxPrice = Integer.parseInt(request.getParameter("maxPrice"));
 		
-		out.println("<H1>Search results for query</H1>"); 
+		boolean foundOption = false; 
 		
-		HttpSession session = request.getSession(true);
-		SearchRes sr = (SearchRes) session.getAttribute("SearchFlag");
-
-		sr = new SearchRes(cindate, cinmonth, cinyear, coutdate, coutmonth, coutyear, city, numRooms, maxPrice);
+		out.println("<H1>Search results for query</H1><br/>"); 
+		
+		SearchRes sr = new SearchRes(cindate, cinmonth, cinyear, coutdate, coutmonth, coutyear, city, numRooms, maxPrice);
 		sr.getSearchResults();
 		
-		//only for testing - TODO: format properly for page later
-		out.println(cindate + " " + cinmonth + " " + cinyear + " " + coutdate + " " + coutmonth + " " + coutyear + " " + 
-				city + " " + numRooms + " " + maxPrice);
+		//just in case booking is requested...
+		Calendar cIn = Calendar.getInstance();
+		cIn.set(cinyear, cinmonth, cindate);
+		long cInToMS = cIn.getTimeInMillis(); 
+		Calendar cOut = Calendar.getInstance();
+		cOut.set(coutyear, coutmonth, coutdate);
+		long cOutToMS = cOut.getTimeInMillis();
+		BookingRequest b = new BookingRequest(cInToMS, cOutToMS, city);
+		session.setAttribute("BookingReq", b);
+		
+		out.println("<b>City: </b> " + city + "<br/>");
+		out.println("<b>Number of rooms: </b> " + numRooms + "<br/>");
+		out.println("<b>Maximum price per night: </b> "+ maxPrice + "<br/>");
+		out.println("<b>Check-in: </b> "+ b.getCheckInToString() + "<br/>");
+		out.println("<b>Check-out: </b> "+ b.getCheckOutToString() + "<br/>");
 		
 		if (sr.getRes().keySet().size() > 0) {
 			out.println("<form action='CheckoutServlet' method='POST'><table>");
 			
 			out.println("<tr>" +
 						"<td><b>Type<b></td>" +
-						"<td><b>Number of beds<b></td>" +
+						"<td><b>Number of beds</b></td>" +
 						"<td><b>Price</b></td>" +
-						"<td><b>Number remaining</b></td>" +
+						"<td><b>Number of rooms required</b></td>" +
+						"<td><b>Number of rooms remaining</b></td>" +
 						"<td><b>Select?</b></td></tr>");
 			for (String type : sr.getRes().keySet()) {
-				out.println("<tr>");
-				out.println("<td>" + type + "</td>" + "<td>" + /*TODO +*/ "</td>" + 
-				"<td>" + /*TODO +*/ "</td>"	+ "<td>" + sr.getRes().get(type) + "</td>" +
-				"<td>" + "<input type='checkbox' name='toBook' value='" + type + "' />" +"</td>");
-				out.println("</tr>");
-				//TODO: checkbox or radio? what if he orders 10 people? need more tha one room...
-				/*if number of beds + 1 <= room's number of beds
+				//if ((TODO: price) < price) {
 					out.println("<tr>");
-					out.println("<td>" + type + "</td>" + "<td>" + (TODO + 1) + "</td>" + 
-					"<td>" + (TODO + 35) + "</td>"	+ "<td>" + sr.getRes().get(type) + "</td>" +
-					"<td>" + "<input type='checkbox' name='toBook' value='" + type + "' />" +"</td>");
-					out.println("</tr>");
-				*/
+					out.println("<td>" + type + "</td>" + "<td>" + /*TODO +*/ "</td>" + 
+					"<td>" + /*BookingRequest.pricePerNight(TODO) +*/ "</td>"	+ "<td>" + numRooms + "</td>" +
+					"<td>" + sr.getRes().get(type) + "</td><td>");
+					if (sr.getRes().get(type) > numRooms) {
+						foundOption = true;
+						out.println("<input type='radio' name='toBook' value='" + type + ";N" + "' />");
+					}
+
+					if (type != "Single") {
+						out.println("</td></tr>");
+						out.println("<tr>");
+						out.println("<td>" + type + "</td>" + "<td>" + /*TODO + 1 +*/ "</td>" + 
+								"<td>" + /*BookingRequest.pricePerNight(TODO) + 35 +*/ "</td>" + "<td>" + numRooms + "</td>" +
+								"<td>" + sr.getRes().get(type) + "</td><td>");
+						if (sr.getRes().get(type) > 0) {
+							foundOption = true;
+							out.println("<input type='radio' name='toBook' value='" + type + ";Y" + "' />");
+						}
+						out.println("</td></tr>");
+					}
+
+					out.println("<tr></tr>");
+				//}
 			}
-					
+			
 			out.println("</table>");
-			out.println("<br><input type='submit'  name='ChoiceSubmit' value='Book!'>");
+			out.println("<br/>Note: prices may change upon confirmation to account for peak-hour timing<br/>");
+			
+			
+			if (!foundOption) {
+				out.println("<br/>No available rooms. Please try again with a different query. Thank you, and "
+						+ "sorry for the inconvenience.<br/>");
+			} else {
+				out.println("<br><input type='submit'  name='ChoiceSubmit' value='Book!'>");
+			}
+			
 			out.println("</form><br/>");
+			
+			out.println("<br/><form action='/Assignment2'>" + 
+					"<input type='submit' value='Back to Search'></form>");
+			
 		} else {
 			out.println("<br/>No available rooms. Please try again with a different query. Thank you, and "
 					+ "sorry for the inconvenience.<br/>");
+			out.println("<br/><form action='/Assignment2'>" + 
+					"<input type='submit' value='Back to Search'></form>");
 		}
-		out.println("<br/><form action='/Assignment2'>" + 
-				"<input type='submit' value='Back to Search'></form>");
+		
 		
 		out.println("</CENTER>");
 		out.println("</BODY>"); 
