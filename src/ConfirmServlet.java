@@ -22,7 +22,6 @@ public class ConfirmServlet extends HttpServlet {
      */
     public ConfirmServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
@@ -39,7 +38,11 @@ public class ConfirmServlet extends HttpServlet {
 		String firstN = request.getParameter("first");
 		String lastN = request.getParameter("last");
 		
-		int pin = 0; //TODO: create PIN
+		int pin = 0;
+		for (int i = 0; i < 8; i++) {
+			int digit = (int) (Math.random()*10);
+			pin = 10*pin + digit;
+		}
 		
 		//TODO: look up people with email address. If non-existant, add them in
 		String searchPersonQry = "SELECT COUNT(*) FROM PEOPLE " +
@@ -85,8 +88,9 @@ public class ConfirmServlet extends HttpServlet {
 		int bookingID = 0;
 		
 		out.println("Your details can be seen and edited (minimum 48 hours prior to check-in date)"
-				+ " at the following URL: EditServlet?bookingID=" + bookingID + "<br/>");
-		out.println("Your PIN is: " + pin + "</br>"); 
+				+ " at the following URL: EditServlet?bookingID=" + bookingID + "<br/>"); //TODO: fix URL
+		out.println("Your PIN is: " + pin + "<br/>");
+		out.println("We have sent an e-mail with these details.<br/><br/>");
 		
 		out.println("<br/><form action='/Assignment2'>" + 
 				"<input type='submit' value='Back to Start'></form>");

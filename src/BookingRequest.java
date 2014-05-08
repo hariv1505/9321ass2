@@ -140,8 +140,11 @@ public class BookingRequest {
 		this.city = city;
 	}
 
-	public String getType() {
-		// TODO Auto-generated method stub
-		return null;
+	public int getType() {
+		return type;
+	}
+	
+	public void setType(int type) {
+		this.type = type;
 	}
 }
