@@ -3,6 +3,7 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -52,23 +53,24 @@ public class ConfirmServlet extends HttpServlet {
 			pin = 10*pin + digit;
 		}
 		
-		String searchPersonQry = "SELECT COUNT(*) FROM PEOPLE " +
-				"WHERE ID = " + emailAdd + ";";
-		Connection con = DatabaseHandle.GetDbConnection();
+		String searchPersonQry = "SELECT COUNT(*) AS COUNT FROM CUSTOMERS " +
+				"WHERE EMAIL = '" + emailAdd + "'";
+		LoadDbDriver();
+		Connection con = GetDbConnection();
 		PreparedStatement ps;
 		ResultSet rs;
-		
 		try {
 			ps = con.prepareStatement(searchPersonQry);
 			rs = ps.executeQuery();
-			rs.next();
-			int count = Integer.parseInt(rs.getString("COUNT"));
-			
-			if (count == 0) {
-				String addPersonQry = "INSERT INTO PEOPLE VALUES " +
-						"(" + emailAdd + "," + firstN + "," + lastN + ");";
-				ps = con.prepareStatement(addPersonQry);
-				rs = ps.executeQuery();
+			if (rs.next()) {
+				int count = Integer.parseInt(rs.getString("COUNT").trim());
+				
+				if (count == 0) {
+					String addPersonQry = "INSERT INTO CUSTOMERS VALUES " +
+							"('" + emailAdd + "','" + firstN + "','" + lastN + "')";
+					ps = con.prepareStatement(addPersonQry);
+					ps.executeUpdate();
+				}
 			}
 		} catch (SQLException e) {
 			out.println("Cannot add user.");
@@ -80,26 +82,26 @@ public class ConfirmServlet extends HttpServlet {
 		}
 				
 		try {
-			String roomQry = "SELECT roomID from ROOMS r join BOOKINGS b on r.ID = b.ROOMID "
-					+ "WHERE R.TYPE = 'Single' AND r.ID != b.ROOMID;";
+			String roomQry = "SELECT r.ID from ROOMS r LEFT JOIN BOOKINGS b on r.ID = b.ROOMID "
+					+ "WHERE R.TYPE = '" + b.getType() + "' AND b.ROOMID IS NULL";
 			ps = con.prepareStatement(roomQry);
 			rs = ps.executeQuery();
 			rs.next();
-			int roomID = Integer.parseInt(rs.getString("ID"));
-					
+			int roomID = Integer.parseInt(rs.getString("ID").trim());
 			String insertBookingQry =  "INSERT INTO BOOKINGS(CHECKIN, CHECKOUT,CUSTID,CITYID,ROOMID,EXTRABED,CARDNUM,"
-					+ "PIN) " + "VALUES (" + b.getCheckIn() + "," + b.getCheckOut() + "," +
-					emailAdd + "," + b.getCity() + "," + roomID + "," + 
-					b.isExtraBed() + "," + cardNum + "," + pin + ");";
-				ps = con.prepareStatement(insertBookingQry);
-				rs = ps.executeQuery();
+					+ "PIN) " + "VALUES (" + b.getCheckIn() + "," + b.getCheckOut() + ",'" +
+					emailAdd + "'," + b.getCity() + "," + roomID + "," + 
+					b.isExtraBed() + "," + cardNum + "," + pin + ")";
+			ps = con.prepareStatement(insertBookingQry);
+			ps.executeUpdate();
 			
 			String getBookingQry = "SELECT ID FROM BOOKINGS " + 
 					"WHERE CHECKIN = " + b.getCheckIn() + " AND CHECKOUT = " + b.getCheckOut() + 
-					" AND CUSTID = " + emailAdd + " AND CITYID = " + b.getCity() + 
+					" AND CUSTID = '" + emailAdd + "' AND CITYID = " + b.getCity() + 
 					" AND ROOMID = " + roomID + " AND EXTRABED = " + b.isExtraBed() +
-					" AND CARDNUM = " + cardNum + " AND PIN = " + pin + ";";
-			
+					" AND CARDNUM = " + cardNum + " AND PIN = " + pin ;
+			System.out.println(getBookingQry);
+
 			ps = con.prepareStatement(getBookingQry);
 			rs = ps.executeQuery();
 			rs.next();
@@ -135,7 +137,7 @@ public class ConfirmServlet extends HttpServlet {
 			out.println("</BODY>"); 
 			out.println("</HTML>");
 			out.close();
-			DatabaseHandle.CloseDbConnection(con);
+			CloseDbConnection(con);
 		}
 	}
 
@@ -143,6 +145,74 @@ public class ConfirmServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	}
+	
+	public static Connection GetDbConnection() {
+		
+        String connectionURL = "jdbc:derby:/home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2";
+        Connection conn = null;
+
+        // Start the database and set up users, then close database
+        try {
+            System.out.println("Trying to connect to " + connectionURL);
+            conn = DriverManager.getConnection(connectionURL);
+            System.out.println("Connected to database " + connectionURL);
+            return conn;
+        }catch(Exception e){
+        	System.out.println(e);
+        }
+        return null;
+		//
+	}
+	
+	public static void LoadDbDriver() {
+        // Load the driver
+		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
+		
+        try {
+            Class.forName(driver).newInstance();
+            System.out.println(driver + " loaded.");
+        } catch (java.lang.ClassNotFoundException e) {
+            System.err.print("ClassNotFoundException: ");
+            System.err.println(e.getMessage());
+            System.out.println("\n Make sure your CLASSPATH variable " +
+                "contains %DERBY_HOME%\\lib\\derby.jar (${DERBY_HOME}/lib/derby.jar). \n");
+        } catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+	}
+		
+	public static void CloseDbConnection(Connection conn) {
+		try {// shut down the database
+            conn.close();
+            System.out.println("Closed connection");
+
+            /* In embedded mode, an application should shut down Derby.
+               Shutdown throws the XJ015 exception to confirm success. */
+            boolean gotSQLExc = false;
+            try {
+                DriverManager.getConnection("jdbc:derby:;shutdown=true");
+                DriverManager.getConnection("exit");
+            } catch (SQLException se) {
+                if ( se.getSQLState().equals("XJ015") ) {
+                    gotSQLExc = true;
+                }
+            }
+            if (!gotSQLExc) {
+                 System.out.println("Database did not shut down normally");
+            } else {
+                 System.out.println("Database shut down normally");
+            }
+
+            // force garbage collection to unload the EmbeddedDriver
+            //  so Derby can be restarted
+            System.gc();
+        } catch (Throwable e) {
+        	System.out.println(e);;
+            System.exit(1);
+        }
 	}
 
 }

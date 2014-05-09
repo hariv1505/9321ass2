@@ -90,9 +90,6 @@ public class SearchRes {
 			e.printStackTrace();
 		}
 		
-		System.out.println(rooms.size());
-		System.out.println(rooms.keySet());
-		
 		CloseDbConnection(con);
 	}
 	
@@ -109,10 +106,8 @@ public class SearchRes {
             System.out.println("\n Make sure your CLASSPATH variable " +
                 "contains %DERBY_HOME%\\lib\\derby.jar (${DERBY_HOME}/lib/derby.jar). \n");
         } catch (InstantiationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

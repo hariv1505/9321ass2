@@ -25,12 +25,12 @@ public class BookingServlet extends HttpServlet {
     }
 
 	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("text/html");
 		
-		HttpSession session = request.getSession(true);
+		HttpSession session = request.getSession();
 		
 		BookingRequest b = (BookingRequest) session.getAttribute("BookingReq");
 		String roomToBook  = request.getParameter("toBook");
@@ -39,8 +39,10 @@ public class BookingServlet extends HttpServlet {
 			//TODO: redo input
 			return;
 		} else {
-			b.setRest(roomToBook);
-			session.setAttribute("BookingReq", b);
+			if (b != null) {
+				b.setRest(roomToBook);
+				session.setAttribute("BookingReq", b);
+			} else 	System.out.println("b is null");
 		}
 		
 		PrintWriter out = response.getWriter();
@@ -50,7 +52,7 @@ public class BookingServlet extends HttpServlet {
 		
 		out.println("<h1>Book your place!</h1>");
 		
-		out.println("<br/><b>Type:</b> " + roomToBook + "<br/>");
+		out.println("<br/><b>Type:</b> " + roomToBook.split(";")[0] + "<br/>");
 		out.println("<br/><b>City:</b> " + b.getCity() + "<br/>");
 		out.println("<b>Number of beds:</b> " + b.getNumBeds() + "<br/>");
 		out.println("<b>Number of rooms:</b> " + b.getNumRooms() + "<br/>");
@@ -76,7 +78,7 @@ public class BookingServlet extends HttpServlet {
 	}
 
 	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		

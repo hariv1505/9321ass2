@@ -36,7 +36,7 @@ public class SearchServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		HttpSession session = request.getSession(true);
+		HttpSession session = request.getSession();
 		
 		response.setContentType("text/html"); 
 		PrintWriter out = response.getWriter();
@@ -44,7 +44,6 @@ public class SearchServlet extends HttpServlet {
 		out.println("<BODY>"); 
 		out.println("<CENTER>"); 
 		
-		System.out.println(request.getParameter("cindate"));
 		Integer cindate = Integer.parseInt(request.getParameter("cindate"));
 		Integer cinmonth = Integer.parseInt(request.getParameter("cinmonth"));
 		Integer cinyear = Integer.parseInt(request.getParameter("cinyear"));
@@ -75,7 +74,7 @@ public class SearchServlet extends HttpServlet {
 		long cOutToMS = cOut.getTimeInMillis();
 		BookingRequest b = new BookingRequest(cInToMS, cOutToMS, city);
 		session.setAttribute("BookingReq", b);
-		System.out.println(cInToMS + " " + cOutToMS);
+		System.out.println(b);
 		
 		out.println("<b>City: </b> " + city + "<br/>");
 		out.println("<b>Number of rooms: </b> " + numRooms + "<br/>");
@@ -109,25 +108,27 @@ public class SearchServlet extends HttpServlet {
 				}
 				
 				for (String type : sr.getRes().keySet()) {
-					if (prices.get(type) < maxPrice) {
+					if (prices.get(type) <= maxPrice) {
 						out.println("<tr>");
 						out.println("<td>" + type + "</td>" + "<td>" + numberOfBeds.get(type) + "</td>" + 
 								"<td>" + prices.get(type) + "</td>"	+ "<td>" + numRooms + "</td>" +	
 								"<td>" + sr.getRes().get(type) + "</td><td>");
 						if (sr.getRes().get(type) > numRooms) {
 							foundOption = true;
-							out.println("<input type='radio' name='toBook' value='" + type + ";N" + "' />");
+							out.println("<input type='radio' name='toBook' id='toBook' value='" + type + ";N;"
+							+ numRooms + "' />");
 						}
 	
 						if (type != "Single") {
 							out.println("</td></tr>");
 							out.println("<tr>");
-							out.println("<td>" + type + "</td>" + "<td>" + numberOfBeds.get(type) + 1 + "</td>" + 
-									"<td>" + prices.get(type) + 35 + "</td>" + "<td>" + numRooms + "</td>" +
+							out.println("<td>" + type + "</td>" + "<td>" + (numberOfBeds.get(type) + 1) + "</td>" + 
+									"<td>" + (prices.get(type) + 35) + "</td>" + "<td>" + numRooms + "</td>" +
 									"<td>" + sr.getRes().get(type) + "</td><td>");
 							if (sr.getRes().get(type) > 0) {
 								foundOption = true;
-								out.println("<input type='radio' name='toBook' value='" + type + ";Y" + "' />");
+								out.println("<input type='radio' name='toBook' id='toBook' value='" + type + ";Y;"
+								+ numRooms + "' />");
 							}
 							out.println("</td></tr>");
 						}

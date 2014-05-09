@@ -1,4 +1,5 @@
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +18,7 @@ public class BookingRequest {
 	private long checkIn;
 	private long checkOut;
 	private int city;
-	private int type;
+	private String type;
 	public static Map<Long, Long> publicPeakPeriods;
 	private Map<Long, Long> peakPeriods;
 	
@@ -80,30 +81,27 @@ public class BookingRequest {
 	public void setRest(String roomToBook) {
 		String[] roomToBookDetails = roomToBook.split(";");
 		if (roomToBookDetails[1] == "Y") isExtraBed = true;
-		String type = roomToBookDetails[0];
+		this.type = roomToBookDetails[0];
 		
-		numRooms = Integer.parseInt(roomToBookDetails[2]);
+		this.numRooms = Integer.parseInt(roomToBookDetails[2]);
 		
 		String roomQry = "SELECT * FROM ROOMS "
-				+ "WHERE TYPE = " + type + ";";
-		Connection con = DatabaseHandle.GetDbConnection();
+				+ "WHERE TYPE = '" + this.type + "'";
+		Connection con = GetDbConnection();
 		try {
 			PreparedStatement ps = con.prepareStatement(roomQry);
 			ResultSet rs = ps.executeQuery();
 			rs.next();
-			price = Integer.parseInt(rs.getString("PRICE"));
-			numBeds = Integer.parseInt(rs.getString("NUMBEDS"));
+			price = Integer.parseInt(rs.getString("PRICE").trim());
+			numBeds = Integer.parseInt(rs.getString("NUMBEDS").trim());
 		} catch (SQLException e) {
 			price = 0;
 			numBeds = 0;
+			System.err.println("Cannot set price and numbeds");
 		}
-		DatabaseHandle.CloseDbConnection(con);
+		CloseDbConnection(con);
 		
 		this.setNumRooms(numRooms);
-		
-		if (this.isExtraBed()) {
-			numBeds++;
-		}
 		
 	}
 	
@@ -112,6 +110,9 @@ public class BookingRequest {
 	}
 
 	public Integer getNumBeds() {
+		if (this.isExtraBed()) {
+			return numBeds+1;
+		}
 		return numBeds;
 	}
 
@@ -119,15 +120,6 @@ public class BookingRequest {
 		return price;
 	}
 	
-
-	public void setNumBeds(int numBeds) {
-		this.numBeds = numBeds;
-	}
-
-	public void setPrice(int price) {
-		this.price = price;
-	}
-
 	public int getNumRooms() {
 		return numRooms;
 	}
@@ -174,8 +166,8 @@ public class BookingRequest {
 	public double getTotalPrice() {
 		double ans = 0;
 		
-		for (long i = checkIn; i <= checkOut; i++) {
-			for (long start : peakPeriods.values()) {
+		for (long i = checkIn; i <= checkOut; i += (24*60*60*1000)) {
+			for (long start : peakPeriods.keySet()) {
 				if (start > i) {
 					ans += price;
 					if (isExtraBed)  ans += 35;
@@ -194,14 +186,14 @@ public class BookingRequest {
 	
 	public static double getTotalPrice(int p, long cin, long cout, int numR) {
 		double ans = 0;
-		for (long i = cin; i <= cout; i++) {
+		for (long i = cin; i <= cout; i += (24*60*60*1000)) {
 			for (long start : publicPeakPeriods.values()) {
-				if (start > i) {
-					ans += p;
-					break;
-				} else {
-					if (publicPeakPeriods.get(start) > i) {
+				if (i >= start) {
+					if (publicPeakPeriods.get(start) <= i) {
 						ans += p*1.4;
+						break;
+					} else {
+						ans += p;
 						break;
 					}
 				}
@@ -218,11 +210,77 @@ public class BookingRequest {
 		this.city = city;
 	}
 
-	public int getType() {
-		return type;
+	public String getType() {
+		return this.type;
 	}
 	
-	public void setType(int type) {
-		this.type = type;
+	public static void LoadDbDriver() {
+        // Load the driver
+		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
+		
+        try {
+            Class.forName(driver).newInstance();
+            System.out.println(driver + " loaded.");
+        } catch (java.lang.ClassNotFoundException e) {
+            System.err.print("ClassNotFoundException: ");
+            System.err.println(e.getMessage());
+            System.out.println("\n Make sure your CLASSPATH variable " +
+                "contains %DERBY_HOME%\\lib\\derby.jar (${DERBY_HOME}/lib/derby.jar). \n");
+        } catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static Connection GetDbConnection() {
+		
+		LoadDbDriver();
+        String connectionURL = "jdbc:derby:/home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2";
+        Connection conn = null;
+
+        // Start the database and set up users, then close database
+        try {
+            System.out.println("Trying to connect to " + connectionURL);
+            conn = DriverManager.getConnection(connectionURL);
+            System.out.println("Connected to database " + connectionURL);
+            return conn;
+        }catch(Exception e){
+        	System.out.println(e);
+        }
+        return null;
+		//
+	}
+		
+	public static void CloseDbConnection(Connection conn) {
+		try {// shut down the database
+            conn.close();
+            System.out.println("Closed connection");
+
+            /* In embedded mode, an application should shut down Derby.
+               Shutdown throws the XJ015 exception to confirm success. */
+            boolean gotSQLExc = false;
+            try {
+                DriverManager.getConnection("jdbc:derby:;shutdown=true");
+                DriverManager.getConnection("exit");
+            } catch (SQLException se) {
+                if ( se.getSQLState().equals("XJ015") ) {
+                    gotSQLExc = true;
+                }
+            }
+            if (!gotSQLExc) {
+                 System.out.println("Database did not shut down normally");
+            } else {
+                 System.out.println("Database shut down normally");
+            }
+
+            // force garbage collection to unload the EmbeddedDriver
+            //  so Derby can be restarted
+            System.gc();
+        } catch (Throwable e) {
+        	System.out.println(e);;
+            System.exit(1);
+        }
 	}
 }
+

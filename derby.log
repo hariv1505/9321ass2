@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Fri May 09 13:59:46 EST 2014:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.2.0 - (1582446): instance a816c00e-0145-df23-0a00-00000a03cdb8 
+Fri May 09 19:33:00 EST 2014:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.2.0 - (1582446): instance a816c00e-0145-e054-1f41-00000756fcc8 
 on database directory /home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2 with class loader org.apache.catalina.loader.StandardClassLoader@6f539caf 
 Loaded from file:/home/hari/apache-tomcat-7.0.53/lib/derby.jar
 java.vendor=Oracle Corporation
@@ -12,8 +12,8 @@ os.version=3.8.0-38-generic
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Fri May 09 13:59:46 EST 2014: Shutting down Derby engine
+Fri May 09 19:33:00 EST 2014: Shutting down Derby engine
 ----------------------------------------------------------------
-Fri May 09 13:59:47 EST 2014:
-Shutting down instance a816c00e-0145-df23-0a00-00000a03cdb8 on database directory /home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2 with class loader org.apache.catalina.loader.StandardClassLoader@6f539caf 
+Fri May 09 19:33:01 EST 2014:
+Shutting down instance a816c00e-0145-e054-1f41-00000756fcc8 on database directory /home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2 with class loader org.apache.catalina.loader.StandardClassLoader@6f539caf 
 ----------------------------------------------------------------
