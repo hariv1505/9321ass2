@@ -8,7 +8,8 @@
 </head>
 <body>
 <h1>Welcome: Please Select from the given options </h1>
-<table align="centre">
+<center>
+<table>
 <tr>
 <td align = "left"><a href="ReceptionManager.jsp">Reception Manager</a></td>
 </tr>
@@ -22,5 +23,6 @@
 </tr>
 
 </table>
+</center>
 </body>
 </html>

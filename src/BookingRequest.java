@@ -19,6 +19,8 @@ public class BookingRequest {
 	private String type;
 	public static Map<Long, Long> publicPeakPeriods;
 	private Map<Long, Long> peakPeriods;
+	private double peakPremium;
+	private double discount;
 	
 	
 	public BookingRequest(long checkIn, long checkOut, int city) {
@@ -173,16 +175,41 @@ public class BookingRequest {
 				} else {
 					if (peakPeriods.get(start) > i) {
 						ans += price*1.4;
+						this.peakPremium += (double)price*0.4;
 						if (isExtraBed)  ans += 35;
 						break;
 					}
 				}
 			}
+			
+			String discQuery = "SELECT * FROM DISCOUNT";
+			Connection con = GetDbConnection();
+			PreparedStatement ps;
+			ResultSet rs;
+			try {
+				ps = con.prepareStatement(discQuery);
+				rs = ps.executeQuery();
+				
+				while (rs.next()) {
+					if (rs.getString("ROOMTYPE") == this.getType()) {
+						if ((getMillis(Integer.parseInt(rs.getString("STARTDATE"))) < i) &&
+						(getMillis(Integer.parseInt(rs.getString("ENDDATE"))) > i)) {
+							this.discount += (double)Integer.parseInt(rs.getString("DISCOUNTRATE"))/100 * price;
+						}
+					}
+				}
+			} catch (NumberFormatException | SQLException e) {
+				e.printStackTrace();
+			}
+			
 		}
+		
+		ans -= this.discount;
+		
 		return ans;
 	}
 	
-	public static double getTotalPrice(int p, long cin, long cout, int numR) {
+	public static double getTotalPrice(int p, long cin, long cout, int numR, String type) {
 		double ans = 0;
 		for (long i = cin; i <= cout; i += (24*60*60*1000)) {
 			for (long start : publicPeakPeriods.values()) {
@@ -195,6 +222,25 @@ public class BookingRequest {
 						break;
 					}
 				}
+			}
+			String discQuery = "SELECT * FROM DISCOUNT";
+			Connection con = GetDbConnection();
+			PreparedStatement ps;
+			ResultSet rs;
+			try {
+				ps = con.prepareStatement(discQuery);
+				rs = ps.executeQuery();
+				
+				while (rs.next()) {
+					if (rs.getString("ROOMTYPE") == type) {
+						if ((getMillis(Integer.parseInt(rs.getString("STARTDATE"))) < i) &&
+						(getMillis(Integer.parseInt(rs.getString("ENDDATE"))) > i)) {
+							ans -= (double)Integer.parseInt(rs.getString("DISCOUNTRATE"))/100 * p;
+						}
+					}
+				}
+			} catch (NumberFormatException | SQLException e) {
+				e.printStackTrace();
 			}
 		}
 		return ans;
@@ -210,6 +256,13 @@ public class BookingRequest {
 
 	public String getType() {
 		return this.type;
+	}
+	
+	public static long getMillis(int date) {
+		Calendar cal = Calendar.getInstance();
+		cal.set(date % 100, (date % 1000)/100, date / 1000, 0, 0, 0);
+		cal.set(Calendar.MILLISECOND,0);
+		return cal.getTimeInMillis();
 	}
 	
 	public static void LoadDbDriver() {

@@ -129,30 +129,30 @@ if(request.getParameter("Discountconfirm")!=null){
 	String discount=request.getParameter("Discount");
 	String RT=request.getParameter("RoomType");
 	if(discount.matches("\\d+")==true && RT.matches("[a-zA-Z]+")){
-	Integer StartDate=Integer.parseInt(request.getParameter("Sday")+request.getParameter("Smonth")+request.getParameter("Syear"));	
-	Integer EndDate=Integer.parseInt(request.getParameter("Eday")+request.getParameter("Emonth")+request.getParameter("Eyear"));
-	String type=request.getParameter("RoomType");
-	Integer Discount=Integer.parseInt(request.getParameter("Discount"));
-	
-	try{
-		Connection con=dh.GetDbConnection();
+		Integer StartDate=Integer.parseInt(request.getParameter("Sday")+request.getParameter("Smonth")+request.getParameter("Syear"));	
+		Integer EndDate=Integer.parseInt(request.getParameter("Eday")+request.getParameter("Emonth")+request.getParameter("Eyear"));
+		String type=request.getParameter("RoomType");
+		Integer Discount=Integer.parseInt(request.getParameter("Discount"));
 		
-		String insertTableSQL = "INSERT INTO Discount (STARTDATE, ENDDATE, ROOMTYPE, DISCOUNTRATE) VALUES (?,?,?,?)";
-		PreparedStatement preparedStatement = con.prepareStatement(insertTableSQL);
-		preparedStatement.setInt(1, StartDate);
-		preparedStatement.setInt(2, EndDate);
-		preparedStatement.setString(3, type);
-		preparedStatement.setInt(4, Discount);		
-		// execute insert SQL stetement
-		int k=preparedStatement .executeUpdate();
-		if(k>=1)
-			out.println("Discount Set Successfully");
-		else 
-			out.println("ERROR");
-	}catch(Exception e){
-		System.out.println(e);
-		
-	}
+		try{
+			Connection con=dh.GetDbConnection();
+			
+			String insertTableSQL = "INSERT INTO Discount (STARTDATE, ENDDATE, ROOMTYPE, DISCOUNTRATE) VALUES (?,?,?,?)";
+			PreparedStatement preparedStatement = con.prepareStatement(insertTableSQL);
+			preparedStatement.setInt(1, StartDate);
+			preparedStatement.setInt(2, EndDate);
+			preparedStatement.setString(3, type);
+			preparedStatement.setInt(4, Discount);		
+			// execute insert SQL stetement
+			int k=preparedStatement .executeUpdate();
+			if(k>=1)
+				out.println("Discount Set Successfully");
+			else 
+				out.println("ERROR");
+		} catch (Exception e) {
+			System.out.println(e);
+			
+		}
 	}else {
 		out.println ("Enter Valid value for Discount and Room type");
 		
