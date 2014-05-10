@@ -30,6 +30,14 @@ public class BookingRequest {
 		this.setPeakPeriods();
 	}
 	
+	public double getPeakPrem() {
+		return peakPremium;
+	}
+	
+	public double getDiscount() {
+		return discount;
+	}
+	
 	private void setPeakPeriods() {
 		peakPeriods = new HashMap<Long, Long>();
 		Calendar start = Calendar.getInstance();
