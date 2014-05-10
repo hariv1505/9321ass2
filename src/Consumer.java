@@ -10,18 +10,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 //import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSession;
 
 /**
  * Servlet implementation class WelcomeServlet
  */
-@WebServlet("/")
-public class WelcomeServlet extends HttpServlet {
+@WebServlet("/ConsumerPage")
+public class Consumer extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public WelcomeServlet() {
+    public Consumer() {
         super();
     }
 
@@ -39,15 +40,15 @@ public class WelcomeServlet extends HttpServlet {
 		response.setContentType("text/html"); 
     	PrintWriter out = response.getWriter();
     	
-    	//HttpSession session = request.getSession(true);
+    	HttpSession session = request.getSession(true);
+    	session.setAttribute("isError", false);
     	    	
     	out.println("<HTML>");
     	out.println("<BODY>"); 
     	out.println("<CENTER>");
     	out.println("<H1>Search for a room!</H1>"); 
     	
-		//TODO need to verify input
-    	out.println("<FORM ACTION='SearchServlet' METHOD='POST'>"); 
+    	out.println("<FORM ACTION='Search' METHOD='POST'>"); 
     	out.println("<label for='checkin'>Check In</label><div name='checkin'><select name='cindate'>");
     	for (int i = 1; i <= 31; i++) {
     		out.println("<option value='" + i + "'>" + i + "</option>");

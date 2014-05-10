@@ -19,13 +19,13 @@ import javax.servlet.http.HttpSession;
  * Servlet implementation class ConfirmServlet
  */
 @WebServlet("/ConfirmServlet")
-public class ConfirmServlet extends HttpServlet {
+public class Confirm extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public ConfirmServlet() {
+    public Confirm() {
         super();
     }
 
@@ -40,12 +40,30 @@ public class ConfirmServlet extends HttpServlet {
 		out.println("<CENTER>"); 
 		
 		HttpSession session = request.getSession(true);
+		boolean isError = false;
 		
 		BookingRequest b = (BookingRequest) session.getAttribute("BookingReq");
-		long cardNum = Long.parseLong(request.getParameter("cardnum"));
+		long cardNum = 0;
+		String sCardNum = request.getParameter("cardnum");
 		String emailAdd = request.getParameter("email");
 		String firstN = request.getParameter("first");
 		String lastN = request.getParameter("last");
+		
+		if (sCardNum.matches("[0-9]+")) {
+			cardNum = Long.parseLong(sCardNum);
+		} else {
+			isError = true;
+		}
+		
+		if (!(firstN.matches("[a-zA-Z]+") && lastN.matches("[a-zA-Z]+"))) {
+			isError = true;
+		}
+		
+		if (isError) {
+			request.setAttribute("isError", true);
+			response.sendRedirect("/Booking");
+			return;
+		}
 		
 		int pin = 0;
 		for (int i = 0; i < 8; i++) {
@@ -123,7 +141,7 @@ public class ConfirmServlet extends HttpServlet {
 			out.println("<br/><b>Card Number:</b> " + cardNum + "<br/>");
 			
 			out.println("Your details can be seen and edited (minimum 48 hours prior to check-in date)"
-					+ " at the following URL: EditServlet?bookingID=" + bookingID + "<br/>"); //TODO: fix URL
+					+ " at the following URL: EditBooking?bookingID=" + bookingID + "<br/>"); //TODO: fix URL
 			out.println("Your PIN is: " + pin + "<br/>");
 			out.println("We have sent an e-mail with these details.<br/><br/>");
 			

@@ -3,31 +3,21 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SearchRes {
 	private Map<String,Integer> rooms;
-	private Integer cindate;
-	private Integer cinmonth;
-	private Integer cinyear;
-	private Integer coutdate;
-	private Integer coutmonth;
-	private Integer coutyear;
+	private long cInToMS;
+	private long cOutToMS;
 	private Integer city;
 	private Integer numRooms;
 	private Integer maxPrice;
 	
-	public SearchRes(int cindate, int cinmonth, int cinyear, int coutdate, int coutmonth, int coutyear,
-			int city, int numRooms, Integer maxPrice) {
+	public SearchRes(long cInToMS2, long cOutToMS2, int city, int numRooms, Integer maxPrice) {
 		rooms = new HashMap<String,Integer>();
-		this.cindate = cindate;
-		this.cinmonth = cinmonth;
-		this.cinyear = cinyear;
-		this.coutdate = coutdate;
-		this.coutmonth = coutmonth;
-		this.coutyear = coutyear;
+		this.cInToMS = cInToMS2;
+		this.cOutToMS = cOutToMS2;
 		this.city = city;
 		this.numRooms = numRooms;
 		this.maxPrice = maxPrice;
@@ -43,27 +33,19 @@ public class SearchRes {
 
 	public void getSearchResults() {
 		
-		this.search(cindate,cinmonth,cinyear,coutdate,coutmonth,coutyear,city,numRooms,maxPrice);
+		this.search(cInToMS,cOutToMS,city,numRooms,maxPrice);
 		
 	}
 
-	private void search(Integer cind, Integer cinm,
-			Integer ciny, Integer coutd, Integer coutm,
-			Integer couty, Integer ct, Integer numRoom, Integer maxP) {
-		Calendar cIn = Calendar.getInstance();
-		cIn.set(ciny, cinm, cind);
-		long cInToMS = cIn.getTimeInMillis(); 
-		Calendar cOut = Calendar.getInstance();
-		cOut.set(couty, coutm, coutd);
-		long cOutToMS = cOut.getTimeInMillis();
-		
+	private void search(long cInToMS, long cOutToMS, Integer ct, Integer numRoom, Integer maxP) {
 		rooms.put("Single", 0);
 		rooms.put("Twin Bed", 0);
 		rooms.put("Suite", 0);
 		rooms.put("Queen", 0);
 		rooms.put("Executive", 0);
 		
-		String qry = "SELECT r.TYPE, COUNT(r.TYPE) AS COUNT FROM BOOKINGS b JOIN ROOMS r on (r.ID=b.ROOMID) " +
+		String qry = "SELECT r.TYPE, COUNT(r.TYPE) AS COUNT FROM BOOKINGS b JOIN ROOM r on (r.ID=b.ROOMID) "
+				+ "JOIN RESERVED re on re.BOOKID = b.ID " +
 				"WHERE r.PRICE <=" + maxP + " AND " +
 				"b.CHECKIN <" + cInToMS + " AND " +
 				"b.CHECKOUT >" + cOutToMS + " AND " +

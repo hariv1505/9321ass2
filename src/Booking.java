@@ -13,14 +13,14 @@ import javax.servlet.http.HttpSession;
 /**
  * Servlet implementation class CheckoutServlet
  */
-@WebServlet("/CheckoutServlet")
-public class BookingServlet extends HttpServlet {
+@WebServlet("/Booking")
+public class Booking extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public BookingServlet() {
+    public Booking() {
         super();
     }
 
@@ -36,13 +36,22 @@ public class BookingServlet extends HttpServlet {
 		String roomToBook  = request.getParameter("toBook");
 		
 		if (roomToBook == null) {
-			//TODO: redo input
-			return;
+			if (b.getType() != null) {
+				roomToBook = b.getType();
+				if (b.isExtraBed())	roomToBook += ";Y;";
+				else roomToBook += ";N;";
+				roomToBook += b.getNumRooms();
+			} else {
+				session.setAttribute("isError", true);
+				response.sendRedirect("/Search");
+				return;
+			}
 		} else {
+			session.setAttribute("maxPrice", null);
 			if (b != null) {
 				b.setRest(roomToBook);
 				session.setAttribute("BookingReq", b);
-			} else 	System.out.println("b is null");
+			}
 		}
 		
 		PrintWriter out = response.getWriter();
@@ -65,12 +74,18 @@ public class BookingServlet extends HttpServlet {
 		out.println("<label for='email'>E-Mail</label><input type='email' name='email' /><br/>");
 		out.println("<label for='first'>First Name</label><input type='text' name='first' /><br/>");
 		out.println("<label for='last'>Last Name</label><input type='text' name='last' /><br/>");
-		out.println("<label for='cardnum'>Card Number</label><input type='text' name='cardnum' /><br/>");
-		//TODO need to verify input
+		out.println("<label for='cardnum'>Card Number</label><input type='text' name='cardnum' /><br/>");	
 		out.println("<input type='submit' value='Confirm!' />");
 		out.println("</form>");
 		out.println("<br/><form action='/Assignment2'>" + 
 				"<input type='submit' value='Cancel'></form>");
+		
+		boolean isError = (boolean) session.getAttribute("isError");
+		
+		if (isError) {
+			out.println("Error in input");
+		}
+		
 		out.println("</CENTER>");
 		out.println("</BODY>"); 
 		out.println("</HTML>");
