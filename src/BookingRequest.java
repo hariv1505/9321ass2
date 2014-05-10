@@ -7,8 +7,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import javafx.scene.chart.PieChart.Data;
-
 
 public class BookingRequest {
 	private boolean isExtraBed = false;
