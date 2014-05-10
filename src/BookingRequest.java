@@ -22,6 +22,17 @@ public class BookingRequest {
 	private double peakPremium;
 	private double discount;
 	
+	public BookingRequest(boolean isExtraBed, int numBeds, int numRooms, int price, long checkIn,
+			long checkOut, int city, String type) {
+		this.isExtraBed = isExtraBed;
+		this.numBeds = numBeds;
+		this.numRooms = numRooms;
+		this.price = price;
+		this.checkIn = checkIn;
+		this.checkOut = checkOut;
+		this.city = city;
+		this.type = type;
+	}
 	
 	public BookingRequest(long checkIn, long checkOut, int city) {
 		this.checkIn = checkIn;
@@ -161,14 +172,14 @@ public class BookingRequest {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(checkIn);
 		
-		return cal.get(Calendar.DATE) + "/" + cal.get(Calendar.MONTH)+1 + "/" + cal.get(Calendar.YEAR);
+		return cal.get(Calendar.DATE) + "/" + (cal.get(Calendar.MONTH)+1) + "/" + cal.get(Calendar.YEAR);
 	}
 
 	public String getCheckOutToString() {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(checkOut);
 		
-		return cal.get(Calendar.DATE) + "/" + cal.get(Calendar.MONTH) + "/" + cal.get(Calendar.YEAR);
+		return cal.get(Calendar.DATE) + "/" + (cal.get(Calendar.MONTH)+1) + "/" + cal.get(Calendar.YEAR);
 	}
 	
 	public double getTotalPrice() {

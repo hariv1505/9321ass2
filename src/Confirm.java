@@ -61,7 +61,7 @@ public class Confirm extends HttpServlet {
 		
 		if (isError) {
 			request.setAttribute("isError", true);
-			response.sendRedirect("/Booking");
+			response.sendRedirect("/Assignment2/Booking");
 			return;
 		}
 		
@@ -100,15 +100,9 @@ public class Confirm extends HttpServlet {
 		}
 				
 		try {
-			String roomQry = "SELECT r.ID from ROOMS r LEFT JOIN BOOKINGS b on r.ID = b.ROOMID "
-					+ "WHERE R.TYPE = '" + b.getType() + "' AND b.ROOMID IS NULL";
-			ps = con.prepareStatement(roomQry);
-			rs = ps.executeQuery();
-			rs.next();
-			int roomID = Integer.parseInt(rs.getString("ID").trim());
-			String insertBookingQry =  "INSERT INTO BOOKINGS(CHECKIN, CHECKOUT,CUSTID,CITYID,ROOMID,EXTRABED,CARDNUM,"
+			String insertBookingQry =  "INSERT INTO BOOKINGS(CHECKIN, CHECKOUT,CUSTID,CITYID,TYPE,EXTRABED,CARDNUM,"
 					+ "PIN) " + "VALUES (" + b.getCheckIn() + "," + b.getCheckOut() + ",'" +
-					emailAdd + "'," + b.getCity() + "," + roomID + "," + 
+					emailAdd + "'," + b.getCity() + "," + b.getType() + "," + 
 					b.isExtraBed() + "," + cardNum + "," + pin + ")";
 			ps = con.prepareStatement(insertBookingQry);
 			ps.executeUpdate();
@@ -116,7 +110,7 @@ public class Confirm extends HttpServlet {
 			String getBookingQry = "SELECT ID FROM BOOKINGS " + 
 					"WHERE CHECKIN = " + b.getCheckIn() + " AND CHECKOUT = " + b.getCheckOut() + 
 					" AND CUSTID = '" + emailAdd + "' AND CITYID = " + b.getCity() + 
-					" AND ROOMID = " + roomID + " AND EXTRABED = " + b.isExtraBed() +
+					" AND TYPE = " + b.getType() + " AND EXTRABED = " + b.isExtraBed() +
 					" AND CARDNUM = " + cardNum + " AND PIN = " + pin ;
 			System.out.println(getBookingQry);
 

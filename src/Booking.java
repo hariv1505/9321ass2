@@ -43,7 +43,7 @@ public class Booking extends HttpServlet {
 				roomToBook += b.getNumRooms();
 			} else {
 				session.setAttribute("isError", true);
-				response.sendRedirect("/Search");
+				response.sendRedirect("/Assignment2/Search");
 				return;
 			}
 		} else {

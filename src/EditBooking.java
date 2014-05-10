@@ -85,12 +85,41 @@ public class EditBooking extends HttpServlet {
 			if (pin.equals(savedPin)) {
 				Long checkIn = Long.parseLong(rs.getString("CHECKIN").trim());
 				Long offset = (long)2*24*60*60*1000;
-				System.out.println(checkIn + ", " + Calendar.getInstance().getTimeInMillis() + 
-						", " +  offset + ", " + (long)(checkIn + offset));
 				if (Calendar.getInstance().getTimeInMillis() < checkIn + offset) {
-					//TODO: use query to fill out form with appropriate values
-					out.println("Now print edit page");
-					//TODO: send back to controller. Controller will delete record and add new record				
+					if (request.getParameter("type") == null) {
+						out.println("<form name='AddForm' action='EditBooking' method='post'>");
+						out.println("<input type='text' name='type' id='type' />");
+						out.println("<input type='submit' value='Add room' />");
+						out.println("</form>");
+					} else if (request.getParameter("AddForm") == "Add room") {
+						SearchRes sr = new SearchRes(rs.getLong("CHECKIN"), rs.getLong("CHECKOUT"),
+								rs.getInt("CITY"));
+						sr.getSearchResults();
+						if (sr.getRes().get(request.getParameter("type")) > 0) {
+							String allRoomsQry = "SELECT * FROM ROOMS";
+							ps = con.prepareStatement(allRoomsQry);
+							ResultSet rsAll = ps.executeQuery();
+							rsAll.next();
+							BookingRequest newB = new BookingRequest(false,rsAll.getInt("NUMBEDS"),1,rsAll.getInt("PRICE"),
+									rs.getLong("CHECKIN"),rs.getLong("CHECKOUT"), rs.getInt("CITY"), request.getParameter("type"));
+							out.println("<h1>New booking includes:</h1>");
+							out.println("New room is a " + request.getParameter("type") + "<br/>");
+							out.println("Checkin Time is " + newB.getCheckInToString() + "<br/>");
+							out.println("Checkout Time is " + newB.getCheckOutToString() + "<br/>");
+							String citiesQry = "SELECT * FROM CITIES";
+							ps = con.prepareStatement(citiesQry);
+							ResultSet rsCities = ps.executeQuery();
+							rsCities.next();
+							out.println(rsCities.getString("CITY"));
+							//show updated stuff
+						} else {
+							out.println("<form name='nomorerooms' action='ConsumerPage' method='post'>");
+							out.println("<p>There are no more rooms left</p>");
+							out.println("<input type='submit' value='Delete booking' />");
+							out.println("<input type='submit' value='Keep booking' />");
+							out.println("</form>");
+						}
+					}
 				} else {
 					out.println("<h1>Sorry, you can only edit the page 48 hours prior to booking start.</h1>");
 				}

@@ -46,24 +46,24 @@ public class Search extends HttpServlet {
 		
 		boolean isError = false;
 		
-		Integer cindate;
-		Integer cinmonth;
-		Integer cinyear;
+		Integer cindate = 0;
+		Integer cinmonth = 0;
+		Integer cinyear = 0;
 		
-		Integer coutdate;
-		Integer coutmonth;
-		Integer coutyear;
+		Integer coutdate = 0;
+		Integer coutmonth = 0;
+		Integer coutyear = 0;
 		
-		Integer city;
+		Integer city = 0;
 		
-		Integer numRooms;
+		Integer numRooms = 0;
 		
-		Integer maxPrice;
+		Integer maxPrice = 0;
 		
 		BookingRequest b;
 		
-		long cInToMS;
-		long cOutToMS;
+		long cInToMS = 0;
+		long cOutToMS = 0;
 		
 		try {
 			cindate = Integer.parseInt(request.getParameter("cindate"));
@@ -80,19 +80,18 @@ public class Search extends HttpServlet {
 			
 			maxPrice = Integer.parseInt(request.getParameter("maxPrice"));
 			
-			if (cindate > Calendar.getInstance().get(Calendar.DATE) && 
-					cinmonth > Calendar.getInstance().get(Calendar.MONTH) + 1 && cinyear > Calendar.getInstance().get(Calendar.YEAR)
+			Calendar cIn = Calendar.getInstance();
+			cIn.set(cinyear, (cinmonth-1), cindate,0,0,0);
+			cInToMS = cIn.getTimeInMillis(); 
+			Calendar cOut = Calendar.getInstance();
+			cOut.set(coutyear, (coutmonth-1), coutdate,0,0,0);
+			cOutToMS = cOut.getTimeInMillis();
+			
+			if (cInToMS > Calendar.getInstance().getTimeInMillis()
 					&& numRooms > 0 && maxPrice > 0){}
 			else {
 				isError = true;
 			}
-			
-			Calendar cIn = Calendar.getInstance();
-			cIn.set(cinyear, cinmonth-1, cindate,0,0,0);
-			cInToMS = cIn.getTimeInMillis(); 
-			Calendar cOut = Calendar.getInstance();
-			cOut.set(coutyear, coutmonth-1, coutdate,0,0,0);
-			cOutToMS = cOut.getTimeInMillis();
 			
 			if (cOut.getTimeInMillis() < cIn.getTimeInMillis()) isError = true;
 			
@@ -100,9 +99,7 @@ public class Search extends HttpServlet {
 			b = (BookingRequest) session.getAttribute("BookingReq");
 			maxPrice = (Integer) session.getAttribute("maxPrice");
 			if (b == null || maxPrice == null) {
-				session.setAttribute("isError", true);
-				response.sendRedirect("/ConsumerPage");
-				return;
+				isError = true;
 			} else {
 				cInToMS = b.getCheckIn();
 				cOutToMS = b.getCheckOut();
@@ -113,7 +110,7 @@ public class Search extends HttpServlet {
 		
 		if (isError) {
 			session.setAttribute("isError", true);
-			response.sendRedirect("/ConsumerPage");
+			response.sendRedirect("/Assignment2/ConsumerPage");
 			return;
 		}
 		
@@ -121,7 +118,7 @@ public class Search extends HttpServlet {
 		
 		out.println("<H1>Search results for query</H1><br/>"); 
 		
-		SearchRes sr = new SearchRes(cInToMS,cOutToMS, city, numRooms, maxPrice);
+		SearchRes sr = new SearchRes(cInToMS,cOutToMS, city, maxPrice);
 		sr.getSearchResults();
 		
 		//just in case booking is requested...

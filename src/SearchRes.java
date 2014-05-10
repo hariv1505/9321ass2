@@ -12,17 +12,21 @@ public class SearchRes {
 	private long cOutToMS;
 	private Integer city;
 	private Integer numRooms;
-	private Integer maxPrice;
 	
-	public SearchRes(long cInToMS2, long cOutToMS2, int city, int numRooms, Integer maxPrice) {
+	public SearchRes(long cInToMS2, long cOutToMS2, int city, Integer maxPrice) {
 		rooms = new HashMap<String,Integer>();
 		this.cInToMS = cInToMS2;
 		this.cOutToMS = cOutToMS2;
 		this.city = city;
-		this.numRooms = numRooms;
-		this.maxPrice = maxPrice;
 	}
 	
+	public SearchRes(long long1, long long2, int int1) {
+		rooms = new HashMap<String,Integer>();
+		this.cInToMS = long1;
+		this.cOutToMS = long2;
+		this.city = int1;
+	}
+
 	public Map<String,Integer> getRes() {
 		return rooms;
 	}
@@ -32,19 +36,24 @@ public class SearchRes {
 	}
 
 	public void getSearchResults() {
-		
-		this.search(cInToMS,cOutToMS,city,numRooms,maxPrice);
+		if (numRooms != null) {
+			if (numRooms == 0) {
+				this.search(cInToMS,cOutToMS,city,numRooms);
+				return;
+			}
+		}
+		this.search(cInToMS, cOutToMS, city);
 		
 	}
 
-	private void search(long cInToMS, long cOutToMS, Integer ct, Integer numRoom, Integer maxP) {
+	private void search(long cInToMS, long cOutToMS, Integer ct, Integer maxP) {
 		rooms.put("Single", 0);
 		rooms.put("Twin Bed", 0);
 		rooms.put("Suite", 0);
 		rooms.put("Queen", 0);
 		rooms.put("Executive", 0);
 		
-		String qry = "SELECT r.TYPE, COUNT(r.TYPE) AS COUNT FROM BOOKINGS b JOIN ROOM r on (r.ID=b.ROOMID) "
+		String qry = "SELECT r.TYPE, COUNT(r.TYPE) AS COUNT FROM BOOKINGS b JOIN ROOMS r on (r.ID=b.ROOMID) "
 				+ "JOIN RESERVED re on re.BOOKID = b.ID " +
 				"WHERE r.PRICE <=" + maxP + " AND " +
 				"b.CHECKIN <" + cInToMS + " AND " +
@@ -74,6 +83,44 @@ public class SearchRes {
 		
 		CloseDbConnection(con);
 	}
+	
+	private void search(long cInToMS, long cOutToMS, Integer ct) {
+		rooms.put("Single", 0);
+		rooms.put("Twin Bed", 0);
+		rooms.put("Suite", 0);
+		rooms.put("Queen", 0);
+		rooms.put("Executive", 0);
+		
+		String qry = "SELECT r.TYPE, COUNT(r.TYPE) AS COUNT FROM BOOKINGS b JOIN ROOMS r on (r.ID=b.ROOMID) "
+				+ "JOIN RESERVED re on re.BOOKID = b.ID " +
+				"WHERE b.CHECKIN <" + cInToMS + " AND " +
+				"b.CHECKOUT >" + cOutToMS + " AND " +
+				"b.CITYID = " + ct + " GROUP BY r.TYPE";
+		String allRoomsQry = "SELECT r.TYPE, COUNT(*) AS COUNT FROM ROOMS r"
+				+ " GROUP BY r.TYPE";
+		
+		LoadDbDriver();		
+		Connection con = GetDbConnection();
+		
+		try{
+			PreparedStatement ps = con.prepareStatement(qry);
+			ResultSet rs = ps.executeQuery();
+			ps = con.prepareStatement(allRoomsQry);
+			ResultSet rsAll = ps.executeQuery();
+			while (rs.next()) {
+				rooms.put(rs.getString("TYPE").trim(), (Integer.parseInt(rsAll.getString("COUNT"))
+						- Integer.parseInt(rs.getString("COUNT"))));
+			}
+			while (rsAll.next()) {
+				rooms.put(rsAll.getString("TYPE").trim(), (Integer.parseInt(rsAll.getString("COUNT"))));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		CloseDbConnection(con);
+	}
+
 	
 	public static void LoadDbDriver() {
         // Load the driver

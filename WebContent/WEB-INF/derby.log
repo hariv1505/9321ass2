@@ -1,8 +1,8 @@
 ----------------------------------------------------------------
-Fri May 09 18:31:22 EST 2014:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.2.0 - (1582446): instance a816c00e-0145-e01b-b230-000007a74d48 
+Sun May 11 00:50:39 EST 2014:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.2.0 - (1582446): instance a816c00e-0145-e69d-4c13-000007a14ce8 
 on database directory /home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2 with class loader sun.misc.Launcher$AppClassLoader@55f96302 
-Loaded from file:/home/hari/Derby/lib/derby.jar
+Loaded from file:/home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/Derby/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=1.8.0-b132
 user.dir=/home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF
@@ -12,8 +12,8 @@ os.version=3.8.0-38-generic
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Fri May 09 18:33:14 EST 2014: Shutting down Derby engine
+Sun May 11 00:51:14 EST 2014: Shutting down Derby engine
 ----------------------------------------------------------------
-Fri May 09 18:33:14 EST 2014:
-Shutting down instance a816c00e-0145-e01b-b230-000007a74d48 on database directory /home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2 with class loader sun.misc.Launcher$AppClassLoader@55f96302 
+Sun May 11 00:51:16 EST 2014:
+Shutting down instance a816c00e-0145-e69d-4c13-000007a14ce8 on database directory /home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2 with class loader sun.misc.Launcher$AppClassLoader@55f96302 
 ----------------------------------------------------------------
