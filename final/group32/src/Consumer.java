@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 //import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSession;
 
+import HelperClass.Init;
+
 /**
  * Servlet implementation class WelcomeServlet
  */
@@ -46,18 +48,20 @@ public class Consumer extends HttpServlet {
     	
     	HttpSession session = request.getSession(true);
     	
-    	if (request.getParameter("cancelledBooking").equals("Delete booking")) {
-    		String delQuery = "DELETE FROM BOOKINGS WHERE ID = " + session.getAttribute("bookingID");
-    		Connection con = GetDbConnection();
-    		try {
-	    		PreparedStatement ps = con.prepareStatement(delQuery);
-	    		ps.executeUpdate();
-    		} catch (SQLException e) {
-    			out.println("Could not be deleted - sorry.");
-    			e.printStackTrace();
+    	if (request.getParameter("cancelledBooking") != null) {
+    		if (request.getParameter("cancelledBooking").equals("Delete booking")) {
+	    		String delQuery = "DELETE FROM BOOKINGS WHERE ID = " + session.getAttribute("bookingID");
+	    		Connection con = GetDbConnection();
+	    		try {
+		    		PreparedStatement ps = con.prepareStatement(delQuery);
+		    		ps.executeUpdate();
+	    		} catch (SQLException e) {
+	    			out.println("Could not be deleted - sorry.");
+	    			e.printStackTrace();
+	    		}
     		}
     	}
-    	
+    	    	
     	session.setAttribute("bookingID", null);
     	session.setAttribute("BookingReq", null);
     	if (session.getAttribute("isError") == null) {
@@ -137,11 +141,12 @@ public class Consumer extends HttpServlet {
 	
 	public static Connection GetDbConnection() {
 		
-        String connectionURL = "jdbc:derby:/home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2";
         Connection conn = null;
 
         // Start the database and set up users, then close database
         try {
+        	String dbName=Init.getWebInfPath()+ "/9321ass2";
+            String connectionURL = "jdbc:derby:"+dbName;
             System.out.println("Trying to connect to " + connectionURL);
             conn = DriverManager.getConnection(connectionURL);
             System.out.println("Connected to database " + connectionURL);

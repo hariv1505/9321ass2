@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import HelperClass.Init;
 import HelperClass.MailSender;
 
 /**
@@ -230,11 +231,13 @@ public class Confirm extends HttpServlet {
 	
 	public static Connection GetDbConnection() {
 		
-        String connectionURL = "jdbc:derby:/home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2";
         Connection conn = null;
 
         // Start the database and set up users, then close database
         try {
+        	String dbName=Init.getWebInfPath()+ "/9321ass2";
+            String connectionURL = "jdbc:derby:"+dbName;
+
             System.out.println("Trying to connect to " + connectionURL);
             conn = DriverManager.getConnection(connectionURL);
             System.out.println("Connected to database " + connectionURL);

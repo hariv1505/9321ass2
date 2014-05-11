@@ -7,6 +7,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import HelperClass.Init;
+
 
 public class BookingRequest {
 	private boolean isExtraBed = false;
@@ -307,11 +309,12 @@ public class BookingRequest {
 	public static Connection GetDbConnection() {
 		
 		LoadDbDriver();
-        String connectionURL = "jdbc:derby:/home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2";
         Connection conn = null;
 
         // Start the database and set up users, then close database
         try {
+        	String dbName=Init.getWebInfPath()+ "/9321ass2";
+            String connectionURL = "jdbc:derby:"+dbName;
             System.out.println("Trying to connect to " + connectionURL);
             conn = DriverManager.getConnection(connectionURL);
             System.out.println("Connected to database " + connectionURL);
