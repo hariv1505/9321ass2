@@ -22,6 +22,8 @@ String Room=null;
 String City=null;
 String Customer=null;
 String Custid=null;
+int BookingID=0;
+
 int cityID=0;
 int occupied=0;
 int reserv=0;
@@ -32,6 +34,7 @@ for(String S:selectedItems){
 	Customer= tokens[2];
 	Custid=tokens[7];
 	cityID=Integer.parseInt(tokens[8]);
+	BookingID=Integer.parseInt(tokens[9]);
 }
 
 Room=Room.replaceAll("\\s+","");
@@ -55,12 +58,11 @@ Available Rooms of type <%=Room %> in <%=City%> Hotel
 try{
 	DatabaseHandler2 dh=new DatabaseHandler2();	
 	Connection con=dh.GetDbConnection();
-String selectSQL = "Select count(*) from Bookings b, Customers c, Rooms r, Cities t where b.custid=c.EMAIL and b.cityid=t.id and b.roomid=r.id and t.City=? AND r.type=? and c.Firstname <> ?";
+String selectSQL = "Select count(*) from Bookings where id=? ";
 PreparedStatement preparedStatement = con.prepareStatement(selectSQL);
-preparedStatement.setString(1, City);
-preparedStatement.setString(2, Room);
 
-preparedStatement.setString(3,Customer);
+
+preparedStatement.setInt(1,BookingID);
 ResultSet rs = preparedStatement.executeQuery();
 
 if(rs.next()){
@@ -69,11 +71,10 @@ if(rs.next()){
 }
 
 
-selectSQL = "Select count(*) from Reserved b, Customers c, Rooms r, Cities t where b.custid=c.EMAIL and b.cityid=t.id and b.roomid=r.id and t.City=? AND r.type=?";
+selectSQL = "Select count(*) from Reserved where id=?";
 preparedStatement = con.prepareStatement(selectSQL);
-preparedStatement.setString(1, City);
-preparedStatement.setString(2, Room);
 
+preparedStatement.setInt(1,BookingID);
 rs = preparedStatement.executeQuery();
 
 if(rs.next()){
@@ -112,7 +113,7 @@ preparedStatement.setString(1,Room);
 rs = preparedStatement.executeQuery();
 int i=1;
 while(rs.next()){
-	String reserved=rs.getInt("id")+";"+rs.getString("type")+";"+rs.getInt("Numbeds")+";"+rs.getInt("price")+";"+Custid+";"+Customer+";"+cityID;
+	String reserved=rs.getInt("id")+";"+rs.getString("type")+";"+rs.getInt("Numbeds")+";"+rs.getInt("price")+";"+Custid+";"+Customer+";"+cityID+";"+BookingID;
 	%>	
 <tr> 
 			<td width = 50><%=i%></td>

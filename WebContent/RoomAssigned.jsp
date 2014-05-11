@@ -22,11 +22,12 @@ if(request.getParameter("ReserveRoom")!=null){
 		
 		String[] tokens=S.split(";");		
 			
-		String insertTableSQL = "INSERT INTO RESERVED (ROOMID,CUSTID,CITYID) VALUES (?,?,?)";
+		String insertTableSQL = "INSERT INTO RESERVED (ROOMID,CUSTID,CITYID,BOOKINGID) VALUES (?,?,?,?)";
 		PreparedStatement preparedStatement = con.prepareStatement(insertTableSQL);
 		preparedStatement.setInt(1, Integer.parseInt(tokens[0]));
 		preparedStatement.setString(2, tokens[4]);
-		preparedStatement.setInt(3, Integer.parseInt(tokens[6]));	
+		preparedStatement.setInt(3, Integer.parseInt(tokens[6]));
+		preparedStatement.setInt(4, Integer.parseInt(tokens[7]));
 		// execute insert SQL stetement
 		int k=preparedStatement .executeUpdate();
 		if(k>=1)
@@ -48,7 +49,7 @@ if(request.getParameter("ReserveRoom")!=null){
 <b>Reserved Rooms</b>
 <table border = "1">
 <tr>
- 			
+ 			<td width = 50>Booking ID</td>
             <td width = 50>Customer</td>
             <td width = 50>City</td>
             <td width = 50>Room Type</td>
@@ -64,7 +65,7 @@ try{
 
 Statement stmt = con.createStatement();
 
-String sql = "Select c.Firstname Customer,t.city City ,r.type Room from RESERVED b, Customers c, Rooms r, Cities t where b.custid=c.EMAIL and b.cityid=t.id and b.roomid=r.id";
+String sql = "Select BOOKINGID, c.Firstname Customer,t.city City ,r.type Room from RESERVED b, Customers c, Rooms r, Cities t where b.custid=c.EMAIL and b.cityid=t.id and b.roomid=r.id";
 ResultSet rs = stmt.executeQuery(sql);
  
 while (rs.next()){
@@ -73,7 +74,7 @@ while (rs.next()){
 	%>
 	
 	<tr>
- 			
+ 			<td width = 50><%=rs.getString("BOOKINGID") %></td>
             <td width = 50><%=rs.getString("Customer") %></td>
             
             <td width = 50><%=rs.getString("City") %></td>

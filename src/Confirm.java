@@ -100,17 +100,18 @@ public class Confirm extends HttpServlet {
 		}
 				
 		try {
-			String insertBookingQry =  "INSERT INTO BOOKINGS(CHECKIN, CHECKOUT,CUSTID,CITYID,TYPE,EXTRABED,CARDNUM,"
+			String insertBookingQry =  "INSERT INTO BOOKINGS(CHECKIN, CHECKOUT,CUSTID,CITYID,ROOMTYPE,EXTRABED,CARDNUM,"
 					+ "PIN) " + "VALUES (" + b.getCheckIn() + "," + b.getCheckOut() + ",'" +
 					emailAdd + "'," + b.getCity() + "," + b.getType() + "," + 
 					b.isExtraBed() + "," + cardNum + "," + pin + ")";
+			System.out.println(insertBookingQry);
 			ps = con.prepareStatement(insertBookingQry);
 			ps.executeUpdate();
 			
 			String getBookingQry = "SELECT ID FROM BOOKINGS " + 
 					"WHERE CHECKIN = " + b.getCheckIn() + " AND CHECKOUT = " + b.getCheckOut() + 
 					" AND CUSTID = '" + emailAdd + "' AND CITYID = " + b.getCity() + 
-					" AND TYPE = " + b.getType() + " AND EXTRABED = " + b.isExtraBed() +
+					" AND ROOMTYPE = '" + b.getType() + "' AND EXTRABED = " + b.isExtraBed() +
 					" AND CARDNUM = " + cardNum + " AND PIN = " + pin ;
 			System.out.println(getBookingQry);
 
@@ -170,11 +171,10 @@ public class Confirm extends HttpServlet {
             conn = DriverManager.getConnection(connectionURL);
             System.out.println("Connected to database " + connectionURL);
             return conn;
-        }catch(Exception e){
+        } catch(Exception e){
         	System.out.println(e);
         }
         return null;
-		//
 	}
 	
 	public static void LoadDbDriver() {

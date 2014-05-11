@@ -11,13 +11,14 @@ public class SearchRes {
 	private long cInToMS;
 	private long cOutToMS;
 	private Integer city;
-	private Integer numRooms;
+	private Integer maxPrice;
 	
 	public SearchRes(long cInToMS2, long cOutToMS2, int city, Integer maxPrice) {
 		rooms = new HashMap<String,Integer>();
 		this.cInToMS = cInToMS2;
 		this.cOutToMS = cOutToMS2;
 		this.city = city;
+		this.maxPrice = maxPrice;
 	}
 	
 	public SearchRes(long long1, long long2, int int1) {
@@ -36,9 +37,9 @@ public class SearchRes {
 	}
 
 	public void getSearchResults() {
-		if (numRooms != null) {
-			if (numRooms == 0) {
-				this.search(cInToMS,cOutToMS,city,numRooms);
+		if (maxPrice != null) {
+			if (maxPrice == 0) {
+				this.search(cInToMS,cOutToMS,city,maxPrice);
 				return;
 			}
 		}
@@ -53,15 +54,17 @@ public class SearchRes {
 		rooms.put("Queen", 0);
 		rooms.put("Executive", 0);
 		
-		String qry = "SELECT r.TYPE, COUNT(r.TYPE) AS COUNT FROM BOOKINGS b JOIN ROOMS r on (r.ID=b.ROOMID) "
-				+ "JOIN RESERVED re on re.BOOKID = b.ID " +
+		String qry = "SELECT r.TYPE, COUNT(r.TYPE) AS COUNT FROM ROOMS r RIGHT JOIN (RESERVED re "
+				+ "JOIN BOOKINGS b on re.BOOKINGID=b.ID) on re.ROOMID = r.ID " +
 				"WHERE r.PRICE <=" + maxP + " AND " +
 				"b.CHECKIN <" + cInToMS + " AND " +
 				"b.CHECKOUT >" + cOutToMS + " AND " +
-				"b.CITYID = " + ct + " GROUP BY r.TYPE";
+				"b.CITYID = " + ct + " "
+				+ "AND re.BOOKINGID IS NOT NULL"
+				+ " GROUP BY r.TYPE";
 		String allRoomsQry = "SELECT r.TYPE, COUNT(*) AS COUNT FROM ROOMS r"
 				+ " GROUP BY r.TYPE";
-		
+
 		LoadDbDriver();		
 		Connection con = GetDbConnection();
 		
@@ -91,11 +94,15 @@ public class SearchRes {
 		rooms.put("Queen", 0);
 		rooms.put("Executive", 0);
 		
-		String qry = "SELECT r.TYPE, COUNT(r.TYPE) AS COUNT FROM BOOKINGS b JOIN ROOMS r on (r.ID=b.ROOMID) "
-				+ "JOIN RESERVED re on re.BOOKID = b.ID " +
+		System.out.println(cInToMS + " " + cOutToMS);
+		
+		String qry = "SELECT r.TYPE, COUNT(r.TYPE) AS COUNT FROM ROOMS r RIGHT JOIN (RESERVED re "
+				+ "JOIN BOOKINGS b on re.BOOKINGID=b.ID) on re.ROOMID = r.ID " +
 				"WHERE b.CHECKIN <" + cInToMS + " AND " +
 				"b.CHECKOUT >" + cOutToMS + " AND " +
-				"b.CITYID = " + ct + " GROUP BY r.TYPE";
+				"b.CITYID = " + ct + " "
+				+ "AND re.BOOKINGID IS NOT NULL"
+				+ " GROUP BY r.TYPE";
 		String allRoomsQry = "SELECT r.TYPE, COUNT(*) AS COUNT FROM ROOMS r"
 				+ " GROUP BY r.TYPE";
 		
