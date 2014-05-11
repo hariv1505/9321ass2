@@ -63,7 +63,9 @@ public class EditBooking extends HttpServlet {
 		HttpSession session = request.getSession(true);
 		
 		Integer bookingID = (Integer) session.getAttribute("bookingID");
-		Integer pin = Integer.parseInt(request.getParameter("PIN"));
+		Integer pin = null;
+		if (request.getParameter("type") == null)
+			pin = Integer.parseInt(request.getParameter("PIN"));
 		
 		PrintWriter out = response.getWriter();
 		out.println("<HTML>"); 
@@ -76,67 +78,111 @@ public class EditBooking extends HttpServlet {
 		LoadDbDriver();
 		Connection con = GetDbConnection();
 		PreparedStatement ps;
+		ResultSet rs;
 		try {
 			ps = con.prepareStatement(qry);
-			ResultSet rs = ps.executeQuery();
+			rs = ps.executeQuery();
 			rs.next();
-			Integer savedPin = Integer.parseInt(rs.getString("PIN").trim());
-	
-			if (pin.equals(savedPin)) {
-				Long checkIn = Long.parseLong(rs.getString("CHECKIN").trim());
-				Long offset = (long)2*24*60*60*1000;
-				if (Calendar.getInstance().getTimeInMillis() < checkIn + offset) {
-					if (request.getParameter("type") == null) {
-						out.println("<form name='AddForm' action='EditBooking' method='post'>");
-						out.println("<input type='text' name='type' id='type' />");
-						out.println("<input type='submit' value='Add room' />");
-						out.println("</form>");
-					} else if (request.getParameter("AddForm") == "Add room") {
-						SearchRes sr = new SearchRes(rs.getLong("CHECKIN"), rs.getLong("CHECKOUT"),
-								rs.getInt("CITY"));
-						sr.getSearchResults();
-						if (sr.getRes().get(request.getParameter("type")) > 0) {
-							String allRoomsQry = "SELECT * FROM ROOMS";
-							ps = con.prepareStatement(allRoomsQry);
-							ResultSet rsAll = ps.executeQuery();
-							rsAll.next();
-							BookingRequest newB = new BookingRequest(false,rsAll.getInt("NUMBEDS"),1,rsAll.getInt("PRICE"),
-									rs.getLong("CHECKIN"),rs.getLong("CHECKOUT"), rs.getInt("CITY"), request.getParameter("type"));
-							out.println("<h1>New booking includes:</h1>");
-							out.println("New room is a " + request.getParameter("type") + "<br/>");
-							out.println("Checkin Time is " + newB.getCheckInToString() + "<br/>");
-							out.println("Checkout Time is " + newB.getCheckOutToString() + "<br/>");
-							String citiesQry = "SELECT * FROM CITIES";
-							ps = con.prepareStatement(citiesQry);
-							ResultSet rsCities = ps.executeQuery();
-							rsCities.next();
-							out.println(rsCities.getString("CITY"));
-							//show updated stuff
-						} else {
-							out.println("<form name='nomorerooms' action='ConsumerPage' method='post'>");
-							out.println("<p>There are no more rooms left</p>");
-							out.println("<input type='submit' value='Delete booking' />");
-							out.println("<input type='submit' value='Keep booking' />");
+			if (pin != null) {
+				Integer savedPin = Integer.parseInt(rs.getString("PIN").trim());
+				if (pin.equals(savedPin)) {
+					Long checkIn = Long.parseLong(rs.getString("CHECKIN").trim());
+					Long offset = (long)2*24*60*60*1000;
+					if (Calendar.getInstance().getTimeInMillis() < checkIn + offset) {
+						if (request.getParameter("type") == null) {
+							out.println("<form name='AddForm' id='AddForm' action='EditBooking' method='post'>");
+							out.println("<select name='type'>");
+							out.println("<option value='Single'>Single</option>");
+							out.println("<option value='Queen'>Queen</option>");
+							out.println("<option value='Twin Bed'>Twin Bed</option>");
+							out.println("<option value='Suite'>Suite</option>");
+							out.println("<option value='Executive'>Executive</option>");
+							out.println("</select>");
+							out.println("<input type='submit' value='Add room' />");
 							out.println("</form>");
 						}
+					} else {
+						out.println("<h1>Sorry, you can only edit the page 48 hours prior to booking start.</h1>");
 					}
+				}
+				CloseDbConnection(con);
+			} else if (pin == null && request.getParameter("type") != null) {
+				SearchRes sr = new SearchRes(rs.getLong("CHECKIN"), rs.getLong("CHECKOUT"),
+						rs.getInt("CITYID"));
+				sr.getSearchResults();
+				if (!sr.getRes().keySet().contains(request.getParameter("type"))) {
+					out.println("Room does not exist. Please log in again.");
 				} else {
-					out.println("<h1>Sorry, you can only edit the page 48 hours prior to booking start.</h1>");
+					if (sr.getRes().get(request.getParameter("type")) > 0) {
+						String allRoomsQry = "SELECT * FROM ROOMTYPES";
+						LoadDbDriver();
+						con = GetDbConnection();
+						ps = con.prepareStatement(allRoomsQry);
+						ResultSet rsAll = ps.executeQuery();
+						rsAll.next();
+						BookingRequest newB = new BookingRequest(false,rsAll.getInt("NUMBEDS"),1,rsAll.getInt("PRICE"),
+								rs.getLong("CHECKIN"),rs.getLong("CHECKOUT"), rs.getInt("CITYID"), request.getParameter("type"));
+						String custQuery = "SELECT * FROM CUSTOMERS WHERE EMAIL = '" + rs.getString("CUSTID") + "'";
+						ps = con.prepareStatement(custQuery);
+						ResultSet rsCust = ps.executeQuery();
+						rsCust.next();
+						out.println("<h1>New booking includes:</h1>");
+						out.println("<b>Email:</b> " + rsCust.getString("EMAIL").trim() + "<br/>");
+						out.println("<b>First name:</b> " + rsCust.getString("FIRSTNAME").trim() + "<br/>");
+						out.println("<b>Last name:</b> " + rsCust.getString("LASTNAME").trim() + "<br/>");
+						out.println("<b>New room:</b> " + request.getParameter("type") + "<br/>");
+						out.println("<b>Checkin Time:</b> " + newB.getCheckInToString() + "<br/>");
+						out.println("<b>Checkout Time:</b> " + newB.getCheckOutToString() + "<br/>");
+						out.println("<b>Card to use</b>: " + rs.getLong("CARDNUM") + "<br/>");
+						out.printf("<b>Regular total:</b> $%.2f<br/>", (newB.getTotalPrice() - newB.getPeakPrem() - newB.getDiscount()));
+						out.printf("<b>Peak total:</b> $%.2f<br/>",newB.getPeakPrem());
+						out.printf("<b>Discount total:</b> $%.2f<br/>", newB.getDiscount());
+						out.printf("<b>Total Price:</b> <u>$%.2f</u><br/><br/>", newB.getTotalPrice());
+						out.println("<b>Total price:</b>" + newB.getTotalPrice() + rs.getInt("FAIR") + "<br/>" );
+						String citiesQry = "SELECT * FROM CITIES";
+						ps = con.prepareStatement(citiesQry);
+						ResultSet rsCities = ps.executeQuery();
+						rsCities.next();
+						out.println("City is " + rsCities.getString("CITY") + "<br/><br/>");
+						out.println("<form action='ConfirmServlet' method='post'>");
+						out.println("<input type='submit' value='Accept'/>");
+						out.println("<input type='hidden' name='cardnum' value='" + rs.getLong("CARDNUM") + "'/>");
+						out.println("<input type='hidden' name='first' value='" + rsCust.getString("FIRSTNAME").trim() + "'/>");
+						out.println("<input type='hidden' name='last' value='" + rsCust.getString("LASTNAME").trim() + "'/>");
+						out.println("<input type='hidden' name='email' value='" + rsCust.getString("EMAIL").trim() + "'/>");
+						session.setAttribute("BookingReq", newB);
+						System.out.println(newB.getCheckIn());
+						System.out.println(newB.getCheckOut());
+						out.println("</form>");
+						out.println("<form action='ConsumerPage'>");
+						out.println("<input type='submit' value='Cancel'/>");
+						out.println("</form>");
+						//show updated stuff
+					} else {
+						for (String i : sr.getRes().keySet())
+							out.println(i + sr.getRes().get(i));
+						out.println("<form name='nomorerooms' action='ConsumerPage'>");
+						out.println("<p>There are no more rooms left</p>");
+						out.println("<input type='submit' name='cancelledBooking' value='Delete booking' />");
+						out.println("<input type='submit' name='cancelledBooking' value='Keep booking' />");
+						out.println("</form>");
+					}
 				}
 			} else {
 				out.println("<form method='post' action=EditBooking>");
 				out.println("<label for='PIN'>PIN</label><input type='number' name='PIN' />");
 				out.println("</form>");
 				out.println("<br/><br/>Incorrect password");
+				CloseDbConnection(con);
 			}
 		} catch (SQLException e) {
-			out.println("Booking does not exist.");
+			out.println("Booking does not exist. Please log in again.");
+			e.printStackTrace();
 		} finally {
 			out.println("</CENTER>");
 			out.println("</BODY>"); 
 			out.println("</HTML>");
 			out.close();
-			CloseDbConnection(con);
 		}
 	}
 	

@@ -3,6 +3,10 @@
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -41,7 +45,24 @@ public class Consumer extends HttpServlet {
     	PrintWriter out = response.getWriter();
     	
     	HttpSession session = request.getSession(true);
-    	session.setAttribute("isError", false);
+    	
+    	if (request.getParameter("cancelledBooking").equals("Delete booking")) {
+    		String delQuery = "DELETE FROM BOOKINGS WHERE ID = " + session.getAttribute("bookingID");
+    		Connection con = GetDbConnection();
+    		try {
+	    		PreparedStatement ps = con.prepareStatement(delQuery);
+	    		ps.executeUpdate();
+    		} catch (SQLException e) {
+    			out.println("Could not be deleted - sorry.");
+    			e.printStackTrace();
+    		}
+    	}
+    	
+    	session.setAttribute("bookingID", null);
+    	session.setAttribute("BookingReq", null);
+    	if (session.getAttribute("isError") == null) {
+    		session.setAttribute("isError", false);
+    	}
     	    	
     	out.println("<HTML>");
     	out.println("<BODY>"); 
@@ -81,11 +102,86 @@ public class Consumer extends HttpServlet {
         out.println("</select><br/><br/>");
         out.println("<label for='maxPrice'>Max Price ($)</label><input type='number' name='maxPrice'><br/><br/>");
         out.println("<input type='submit' value='Submit'></form>");
+    	
+    	if ((boolean)session.getAttribute("isError")) {
+    		out.println("Wrong input. Start again.");
+    	}
+    	
     	out.println("</CENTER>");
     	out.println("</BODY>");
     	out.println("</HTML>");
     	out.close();
     	
+    	session.setAttribute("isError", false);
+    	
+	}
+	
+	public static void LoadDbDriver() {
+        // Load the driver
+		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
+		
+        try {
+        	Class.forName(driver).newInstance();
+            System.out.println(driver + " loaded.");
+        } catch (java.lang.ClassNotFoundException e) {
+            System.err.print("ClassNotFoundException: ");
+            System.err.println(e.getMessage());
+            System.out.println("\n Make sure your CLASSPATH variable " +
+                "contains %DERBY_HOME%\\lib\\derby.jar (${DERBY_HOME}/lib/derby.jar). \n");
+        } catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static Connection GetDbConnection() {
+		
+        String connectionURL = "jdbc:derby:/home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2";
+        Connection conn = null;
+
+        // Start the database and set up users, then close database
+        try {
+            System.out.println("Trying to connect to " + connectionURL);
+            conn = DriverManager.getConnection(connectionURL);
+            System.out.println("Connected to database " + connectionURL);
+            return conn;
+        }catch(Exception e){
+        	System.out.println(e);
+        }
+        return null;
+		//
+	}
+		
+	public static void CloseDbConnection(Connection conn) {
+		try {// shut down the database
+            conn.close();
+            System.out.println("Closed connection");
+
+            /* In embedded mode, an application should shut down Derby.
+               Shutdown throws the XJ015 exception to confirm success. */
+            boolean gotSQLExc = false;
+            try {
+                DriverManager.getConnection("jdbc:derby:;shutdown=true");
+                DriverManager.getConnection("exit");
+            } catch (SQLException se) {
+                if ( se.getSQLState().equals("XJ015") ) {
+                    gotSQLExc = true;
+                }
+            }
+            if (!gotSQLExc) {
+                 System.out.println("Database did not shut down normally");
+            } else {
+                 System.out.println("Database shut down normally");
+            }
+
+            // force garbage collection to unload the EmbeddedDriver
+            //  so Derby can be restarted
+            System.gc();
+        } catch (Throwable e) {
+        	System.out.println(e);;
+            System.exit(1);
+        }
 	}
 
 }

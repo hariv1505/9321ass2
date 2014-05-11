@@ -21,7 +21,13 @@ public class DatabaseHandle {
 
         // Load the driver
         try {
-            Class.forName(driver);
+            try {
+				Class.forName(driver).newInstance();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
             System.out.println(driver + " loaded.");
         } catch (java.lang.ClassNotFoundException e) {
             System.err.print("ClassNotFoundException: ");

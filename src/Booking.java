@@ -43,7 +43,7 @@ public class Booking extends HttpServlet {
 				roomToBook += b.getNumRooms();
 			} else {
 				session.setAttribute("isError", true);
-				response.sendRedirect("/Assignment2/Search");
+				response.sendRedirect("/Assignment2/ConsumerPage");
 				return;
 			}
 		} else {
@@ -67,8 +67,11 @@ public class Booking extends HttpServlet {
 		out.println("<b>Number of rooms:</b> " + b.getNumRooms() + "<br/>");
 		out.println("<b>Price per night:</b> "+ b.getPricePerNight() + "<br/>");
 		out.println("<b>Check-in:</b> "+ b.getCheckInToString() + "<br/>");
-		out.println("<b>Check-out:</b> "+ b.getCheckOutToString() + "<br/>");
-		out.println("<b>Total Price:</b> <u>"+ b.getTotalPrice() +"</u><br/><br/>");
+		out.println("<b>Check-out:</b> "+ b.getCheckOutToString() + "<br/><br/>");
+		out.printf("<b>Regular total:</b> $%.2f<br/>", (b.getTotalPrice() - b.getPeakPrem() - b.getDiscount()));
+		out.printf("<b>Peak total:</b> $%.2f<br/>",b.getPeakPrem());
+		out.printf("<b>Discount total:</b> $%.2f<br/>", b.getDiscount());
+		out.printf("<b>Total Price:</b> <u>$%.2f</u><br/><br/>", b.getTotalPrice());
 		
 		out.println("<form method='post' action='ConfirmServlet'>");
 		out.println("<label for='email'>E-Mail</label><input type='email' name='email' /><br/>");

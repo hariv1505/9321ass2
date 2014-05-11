@@ -38,7 +38,7 @@ public class SearchRes {
 
 	public void getSearchResults() {
 		if (maxPrice != null) {
-			if (maxPrice == 0) {
+			if (maxPrice > 0) {
 				this.search(cInToMS,cOutToMS,city,maxPrice);
 				return;
 			}
@@ -54,14 +54,14 @@ public class SearchRes {
 		rooms.put("Queen", 0);
 		rooms.put("Executive", 0);
 		
-		String qry = "SELECT r.TYPE, COUNT(r.TYPE) AS COUNT FROM ROOMS r RIGHT JOIN (RESERVED re "
-				+ "JOIN BOOKINGS b on re.BOOKINGID=b.ID) on re.ROOMID = r.ID " +
-				"WHERE r.PRICE <=" + maxP + " AND " +
-				"b.CHECKIN <" + cInToMS + " AND " +
-				"b.CHECKOUT >" + cOutToMS + " AND " +
-				"b.CITYID = " + ct + " "
-				+ "AND re.BOOKINGID IS NOT NULL"
-				+ " GROUP BY r.TYPE";
+		String qry = "SELECT r.TYPE, SUM(b.NUMROOMS) AS COUNT FROM ROOMTYPES r LEFT JOIN BOOKINGS b ON " +  
+				"r.TYPE = b.ROOMTYPE " +
+			"WHERE r.PRICE <= " + maxP + " AND ((b.CHECKIN <=" + cOutToMS + " AND b.CHECKIN >= " + cInToMS + ") OR " +
+			"(b.CHECKOUT <=" + cOutToMS + " AND b.CHECKOUT >= " + cInToMS + ") OR " +
+			"(b.CHECKOUT >=" + cOutToMS + " AND b.CHECKIN <= " + cInToMS + ")) AND " +
+			"b.CITYID = " + ct + 
+			" GROUP BY r.TYPE";
+		System.out.println(qry);
 		String allRoomsQry = "SELECT r.TYPE, COUNT(*) AS COUNT FROM ROOMS r"
 				+ " GROUP BY r.TYPE";
 
@@ -73,12 +73,11 @@ public class SearchRes {
 			ResultSet rs = ps.executeQuery();
 			ps = con.prepareStatement(allRoomsQry);
 			ResultSet rsAll = ps.executeQuery();
-			while (rs.next()) {
-				rooms.put(rs.getString("TYPE").trim(), (Integer.parseInt(rsAll.getString("COUNT"))
-						- Integer.parseInt(rs.getString("COUNT"))));
-			}
 			while (rsAll.next()) {
-				rooms.put(rsAll.getString("TYPE").trim(), (Integer.parseInt(rsAll.getString("COUNT"))));
+				rooms.put(rsAll.getString("TYPE").trim(), rsAll.getInt("COUNT"));
+			}
+			while (rs.next()) {
+				rooms.put(rs.getString("TYPE").trim(), rooms.get(rs.getString("TYPE").trim()) - rs.getInt("COUNT"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -94,15 +93,14 @@ public class SearchRes {
 		rooms.put("Queen", 0);
 		rooms.put("Executive", 0);
 		
-		System.out.println(cInToMS + " " + cOutToMS);
-		
-		String qry = "SELECT r.TYPE, COUNT(r.TYPE) AS COUNT FROM ROOMS r RIGHT JOIN (RESERVED re "
-				+ "JOIN BOOKINGS b on re.BOOKINGID=b.ID) on re.ROOMID = r.ID " +
-				"WHERE b.CHECKIN <" + cInToMS + " AND " +
-				"b.CHECKOUT >" + cOutToMS + " AND " +
-				"b.CITYID = " + ct + " "
-				+ "AND re.BOOKINGID IS NOT NULL"
-				+ " GROUP BY r.TYPE";
+		String qry = "SELECT r.TYPE, SUM(b.NUMROOMS) AS COUNT FROM ROOMTYPES r LEFT JOIN BOOKINGS b ON " +  
+					"r.TYPE = b.ROOMTYPE " +
+				"WHERE ((b.CHECKIN <=" + cOutToMS + " AND b.CHECKIN >= " + cInToMS + ") OR " +
+				"(b.CHECKOUT <=" + cOutToMS + " AND b.CHECKOUT >= " + cInToMS + ") OR " +
+				"(b.CHECKOUT >=" + cOutToMS + " AND b.CHECKIN <= " + cInToMS + ")) AND " +
+				"b.CITYID = " + ct + 
+				" GROUP BY r.TYPE";
+		System.out.println(qry);
 		String allRoomsQry = "SELECT r.TYPE, COUNT(*) AS COUNT FROM ROOMS r"
 				+ " GROUP BY r.TYPE";
 		
@@ -114,12 +112,11 @@ public class SearchRes {
 			ResultSet rs = ps.executeQuery();
 			ps = con.prepareStatement(allRoomsQry);
 			ResultSet rsAll = ps.executeQuery();
-			while (rs.next()) {
-				rooms.put(rs.getString("TYPE").trim(), (Integer.parseInt(rsAll.getString("COUNT"))
-						- Integer.parseInt(rs.getString("COUNT"))));
-			}
 			while (rsAll.next()) {
-				rooms.put(rsAll.getString("TYPE").trim(), (Integer.parseInt(rsAll.getString("COUNT"))));
+				rooms.put(rsAll.getString("TYPE").trim(), rsAll.getInt("COUNT"));
+			}
+			while (rs.next()) {
+				rooms.put(rs.getString("TYPE").trim(), rooms.get(rs.getString("TYPE").trim()) - rs.getInt("COUNT"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

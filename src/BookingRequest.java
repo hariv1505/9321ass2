@@ -32,6 +32,7 @@ public class BookingRequest {
 		this.checkOut = checkOut;
 		this.city = city;
 		this.type = type;
+		this.setPeakPeriods();
 	}
 	
 	public BookingRequest(long checkIn, long checkOut, int city) {

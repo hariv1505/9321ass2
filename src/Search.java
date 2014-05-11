@@ -158,27 +158,27 @@ public class Search extends HttpServlet {
 			for (String type : sr.getRes().keySet()) {
 				if (prices.get(type) <= maxPrice) {
 					out.println("<tr>");
-					out.println("<td>" + type + "</td>" + "<td>" + numberOfBeds.get(type) + "</td>" + 
-							"<td>" + prices.get(type) + "</td>"	+ "<td>" + numRooms + "</td>" +	
-							"<td>" + sr.getRes().get(type) + "</td><td>");
+					out.println("<td><center>" + type + "</center></td>" + "<td><center>" + numberOfBeds.get(type) + "</center></td>" + 
+							"<td><center>" + prices.get(type) + "</center></td>"	+ "<td><center>" + numRooms + "</center></td>" +	
+							"<td><center>" + sr.getRes().get(type) + "</center></td><td><center>");
 					if (sr.getRes().get(type) > numRooms) {
 						foundOption = true;
 						out.println("<input type='radio' name='toBook' id='toBook' value='" + type + ";N;"
 						+ numRooms + "' />");
 					}
 
-					if (type != "Single") {
-						out.println("</td></tr>");
+					if (type != "Single" && prices.get(type) + 35 <= maxPrice) {
+						out.println("</center></td></tr>");
 						out.println("<tr>");
-						out.println("<td>" + type + "</td>" + "<td>" + (numberOfBeds.get(type) + 1) + "</td>" + 
-								"<td>" + (prices.get(type) + 35) + "</td>" + "<td>" + numRooms + "</td>" +
-								"<td>" + sr.getRes().get(type) + "</td><td>");
-						if (sr.getRes().get(type) > 0) {
+						out.println("<td><center>" + type + "</center></td>" + "<td><center>" + (numberOfBeds.get(type) + 1) + "</center></td>" + 
+								"<td><center>" + (prices.get(type) + 35) + "</center></td>" + "<td><center>" + numRooms + "</center></td>" +
+								"<td><center>" + sr.getRes().get(type) + "</center></td><td><center>");
+						if (sr.getRes().get(type) > numRooms) {
 							foundOption = true;
 							out.println("<input type='radio' name='toBook' id='toBook' value='" + type + ";Y;"
 							+ numRooms + "' />");
 						}
-						out.println("</td></tr>");
+						out.println("</center></td></tr>");
 					}
 
 					out.println("<tr></tr>");
@@ -211,7 +211,7 @@ public class Search extends HttpServlet {
 		if (isError) {
 			out.println("Error in input");
 		}
-
+		
 		out.println("</CENTER>");
 		out.println("</BODY>"); 
 		out.println("</HTML>");
