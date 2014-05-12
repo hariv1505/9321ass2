@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import HelperClass.DatabaseHandler2;
 import HelperClass.Init;
 
 public class SearchRes {
@@ -67,10 +68,11 @@ public class SearchRes {
 		String allRoomsQry = "SELECT r.TYPE, COUNT(*) AS COUNT FROM ROOMS r"
 				+ " GROUP BY r.TYPE";
 
-		LoadDbDriver();		
-		Connection con = GetDbConnection();
+				
 		
 		try{
+			DatabaseHandler2 dh = new DatabaseHandler2();
+			Connection con = dh.GetDbConnection();
 			PreparedStatement ps = con.prepareStatement(qry);
 			ResultSet rs = ps.executeQuery();
 			ps = con.prepareStatement(allRoomsQry);
@@ -81,11 +83,11 @@ public class SearchRes {
 			while (rs.next()) {
 				rooms.put(rs.getString("TYPE").trim(), rooms.get(rs.getString("TYPE").trim()) - rs.getInt("COUNT"));
 			}
+			dh.CloseDbConnection(con);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		CloseDbConnection(con);
 	}
 	
 	private void search(long cInToMS, long cOutToMS, Integer ct) {
@@ -106,10 +108,10 @@ public class SearchRes {
 		String allRoomsQry = "SELECT r.TYPE, COUNT(*) AS COUNT FROM ROOMS r"
 				+ " GROUP BY r.TYPE";
 		
-		LoadDbDriver();		
-		Connection con = GetDbConnection();
-		
 		try{
+			DatabaseHandler2 dh=new DatabaseHandler2();	
+			Connection con = dh.GetDbConnection();
+			
 			PreparedStatement ps = con.prepareStatement(qry);
 			ResultSet rs = ps.executeQuery();
 			ps = con.prepareStatement(allRoomsQry);
@@ -120,11 +122,11 @@ public class SearchRes {
 			while (rs.next()) {
 				rooms.put(rs.getString("TYPE").trim(), rooms.get(rs.getString("TYPE").trim()) - rs.getInt("COUNT"));
 			}
+			dh.CloseDbConnection(con);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		CloseDbConnection(con);
 	}
 
 	

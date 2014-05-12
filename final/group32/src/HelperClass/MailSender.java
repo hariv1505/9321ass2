@@ -48,7 +48,7 @@ public class MailSender{
 			logger.info(username);
 			String password = (String)mailProps.get("password");
 			logger.info(password);
-		}catch(NamingException e){
+		} catch (NamingException e) {
 			logger.severe("Cannot find context, throwing exception"+e.getMessage());
 			e.printStackTrace();
 			throw new ServiceLocatorException();

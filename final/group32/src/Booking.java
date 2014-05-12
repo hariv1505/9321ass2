@@ -43,7 +43,7 @@ public class Booking extends HttpServlet {
 				roomToBook += b.getNumRooms();
 			} else {
 				session.setAttribute("isError", true);
-				response.sendRedirect("/Assignment2/ConsumerPage");
+				response.sendRedirect("/group32/ConsumerPage");
 				return;
 			}
 		} else {
@@ -80,13 +80,15 @@ public class Booking extends HttpServlet {
 		out.println("<label for='cardnum'>Card Number</label><input type='text' name='cardnum' /><br/>");	
 		out.println("<input type='submit' value='Confirm!' />");
 		out.println("</form>");
-		out.println("<br/><form action='/Assignment2'>" + 
+		out.println("<br/><form action='/group32'>" + 
 				"<input type='submit' value='Cancel'></form>");
 		
-		boolean isError = (boolean) session.getAttribute("isError");
+		boolean isError = (Boolean) session.getAttribute("isError");
 		
 		if (isError) {
 			out.println("Error in input");
+			out.println("<br/><form action='/group32'>" + 
+					"<input type='submit' value='Back to Search'></form>");
 		}
 		
 		out.println("</CENTER>");

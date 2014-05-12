@@ -42,14 +42,14 @@ String sql = "Select b.id BID,Checkin,checkout,c.Firstname Customer,b.custid,t.i
 ResultSet rs = stmt.executeQuery(sql);
 int bid=10;
 while (rs.next()){
-	String selectedItems= rs.getInt("Checkin")+";"+rs.getInt("Checkout")+";"+rs.getString("Customer")+";"+rs.getString("City")+";"+rs.getString("RoomType")+";"+rs.getBoolean("extrabed")+";"+rs.getInt("fair")+";"+rs.getString("custid")+";"+rs.getInt("cityid")+";"+rs.getInt("BID");
+	String selectedItems= rs.getLong("Checkin")+";"+rs.getLong("Checkout")+";"+rs.getString("Customer")+";"+rs.getString("City")+";"+rs.getString("RoomType")+";"+rs.getBoolean("extrabed")+";"+rs.getInt("fair")+";"+rs.getString("custid")+";"+rs.getInt("cityid")+";"+rs.getInt("BID");
 	bid=rs.getInt("BID");
 	//request.setAttribute("BookingID", bid);
 	%>
 	
 	<tr>    <td width = 50><%=rs.getInt("BID") %></td>
- 			<td width = 50><%=rs.getInt("Checkin") %></td>
-            <td width = 50><%=rs.getInt("Checkout") %></td>
+ 			<td width = 50><%=rs.getLong("Checkin") %></td>
+            <td width = 50><%=rs.getLong("Checkout") %></td>
             <td width = 50><%=rs.getString("Customer") %></td>
             <td width = 50><%=rs.getString("custid") %></td>
             <td width = 50><%=rs.getString("City") %></td>

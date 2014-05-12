@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 //import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSession;
 
+import HelperClass.DatabaseHandler2;
 import HelperClass.Init;
 
 /**
@@ -36,7 +37,7 @@ public class Consumer extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException	{ 
-    	 
+    	 doGet(req, res);
     }
 
 	/**
@@ -51,11 +52,13 @@ public class Consumer extends HttpServlet {
     	if (request.getParameter("cancelledBooking") != null) {
     		if (request.getParameter("cancelledBooking").equals("Delete booking")) {
 	    		String delQuery = "DELETE FROM BOOKINGS WHERE ID = " + session.getAttribute("bookingID");
-	    		Connection con = GetDbConnection();
 	    		try {
+	    			DatabaseHandler2 dh = new DatabaseHandler2();
+	    			Connection con = dh.GetDbConnection();
 		    		PreparedStatement ps = con.prepareStatement(delQuery);
 		    		ps.executeUpdate();
-	    		} catch (SQLException e) {
+		    		dh.CloseDbConnection(con);
+	    		} catch (SQLException | InstantiationException | IllegalAccessException e) {
 	    			out.println("Could not be deleted - sorry.");
 	    			e.printStackTrace();
 	    		}
@@ -107,7 +110,7 @@ public class Consumer extends HttpServlet {
         out.println("<label for='maxPrice'>Max Price ($)</label><input type='number' name='maxPrice'><br/><br/>");
         out.println("<input type='submit' value='Submit'></form>");
     	
-    	if ((boolean)session.getAttribute("isError")) {
+    	if ((Boolean)session.getAttribute("isError")) {
     		out.println("Wrong input. Start again.");
     	}
     	

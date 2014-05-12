@@ -1,13 +1,19 @@
 ----------------------------------------------------------------
-Sun May 11 22:39:09 EST 2014:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.2.0 - (1582446): instance a816c00e-0145-eb4b-4401-00001009c1a8 
-on database directory /home/hari/University/7thYear/COMP9321/Labs/Assignment2/WebContent/WEB-INF/9321ass2 with class loader org.apache.catalina.loader.StandardClassLoader@6f539caf 
+Mon May 12 22:44:12 EST 2014:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.2.0 - (1582446): instance a816c00e-0145-f076-3e7e-00000b881250 
+on database directory /home/hari/University/7thYear/COMP9321/Labs/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/group32/WEB-INF/9321ass2 with class loader org.apache.catalina.loader.StandardClassLoader@6f539caf 
 Loaded from file:/home/hari/apache-tomcat-7.0.53/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=1.8.0-b132
-user.dir=/home/hari/University/7thYear/COMP9321/Labs/Assignment2
+user.dir=/home/hari/University/7thYear/COMP9321/Labs/group32
 os.name=Linux
 os.arch=amd64
 os.version=3.8.0-38-generic
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Mon May 12 22:44:12 EST 2014: Shutting down Derby engine
+----------------------------------------------------------------
+Mon May 12 22:44:12 EST 2014:
+Shutting down instance a816c00e-0145-f076-3e7e-00000b881250 on database directory /home/hari/University/7thYear/COMP9321/Labs/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/group32/WEB-INF/9321ass2 with class loader org.apache.catalina.loader.StandardClassLoader@6f539caf 
+----------------------------------------------------------------

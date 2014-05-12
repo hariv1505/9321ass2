@@ -1,3 +1,4 @@
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -7,6 +8,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import HelperClass.DatabaseHandler2;
 import HelperClass.Init;
 
 
@@ -109,19 +111,27 @@ public class BookingRequest {
 		
 		String roomQry = "SELECT * FROM ROOMS "
 				+ "WHERE TYPE = '" + this.type + "'";
-		Connection con = GetDbConnection();
+		DatabaseHandler2 dh = new DatabaseHandler2();
+		Connection con;
 		try {
-			PreparedStatement ps = con.prepareStatement(roomQry);
-			ResultSet rs = ps.executeQuery();
-			rs.next();
-			price = Integer.parseInt(rs.getString("PRICE").trim());
-			numBeds = Integer.parseInt(rs.getString("NUMBEDS").trim());
-		} catch (SQLException e) {
-			price = 0;
-			numBeds = 0;
-			System.err.println("Cannot set price and numbeds");
+			con = dh.GetDbConnection();
+		
+			try {
+				PreparedStatement ps = con.prepareStatement(roomQry);
+				ResultSet rs = ps.executeQuery();
+				rs.next();
+				price = Integer.parseInt(rs.getString("PRICE").trim());
+				numBeds = Integer.parseInt(rs.getString("NUMBEDS").trim());
+			} catch (SQLException e) {
+				price = 0;
+				numBeds = 0;
+				System.err.println("Cannot set price and numbeds");
+			}
+			dh.CloseDbConnection(con);
+		} catch (UnsupportedEncodingException | InstantiationException
+				| IllegalAccessException e1) {
+			e1.printStackTrace();
 		}
-		CloseDbConnection(con);
 		
 		this.setNumRooms(numRooms);
 		
@@ -187,43 +197,50 @@ public class BookingRequest {
 	
 	public double getTotalPrice() {
 		double ans = 0;
-		
-		for (long i = checkIn; i <= checkOut; i += (24*60*60*1000)) {
-			for (long start : peakPeriods.keySet()) {
-				if (start > i) {
-					ans += price;
-					if (isExtraBed)  ans += 35;
-					break;
-				} else {
-					if (peakPeriods.get(start) > i) {
-						ans += price*1.4;
-						this.peakPremium += (double)price*0.4;
+		DatabaseHandler2 dh = new DatabaseHandler2();
+		Connection con;
+		try {
+			con = dh.GetDbConnection();
+			for (long i = checkIn; i <= checkOut; i += (24*60*60*1000)) {
+				for (long start : peakPeriods.keySet()) {
+					if (start > i) {
+						ans += price;
 						if (isExtraBed)  ans += 35;
 						break;
-					}
-				}
-			}
-			
-			String discQuery = "SELECT * FROM DISCOUNT";
-			Connection con = GetDbConnection();
-			PreparedStatement ps;
-			ResultSet rs;
-			try {
-				ps = con.prepareStatement(discQuery);
-				rs = ps.executeQuery();
-				
-				while (rs.next()) {
-					if (rs.getString("ROOMTYPE") == this.getType()) {
-						if ((getMillis(Integer.parseInt(rs.getString("STARTDATE"))) < i) &&
-						(getMillis(Integer.parseInt(rs.getString("ENDDATE"))) > i)) {
-							this.discount += (double)Integer.parseInt(rs.getString("DISCOUNTRATE"))/100 * price;
+					} else {
+						if (peakPeriods.get(start) > i) {
+							ans += price*1.4;
+							this.peakPremium += (double)price*0.4;
+							if (isExtraBed)  ans += 35;
+							break;
 						}
 					}
 				}
-			} catch (NumberFormatException | SQLException e) {
-				e.printStackTrace();
+				
+				String discQuery = "SELECT * FROM DISCOUNT";
+				PreparedStatement ps;
+				ResultSet rs;
+				try {
+					ps = con.prepareStatement(discQuery);
+					rs = ps.executeQuery();
+					
+					while (rs.next()) {
+						if (rs.getString("ROOMTYPE") == this.getType()) {
+							if ((getMillis(Integer.parseInt(rs.getString("STARTDATE"))) < i) &&
+							(getMillis(Integer.parseInt(rs.getString("ENDDATE"))) > i)) {
+								this.discount += (double)Integer.parseInt(rs.getString("DISCOUNTRATE"))/100 * price;
+							}
+						}
+					}
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				
 			}
-			
+			dh.CloseDbConnection(con);
+		} catch (UnsupportedEncodingException | InstantiationException
+				| IllegalAccessException e1) {
+			e1.printStackTrace();
 		}
 		
 		ans -= this.discount;
@@ -233,37 +250,46 @@ public class BookingRequest {
 	
 	public static double getTotalPrice(int p, long cin, long cout, int numR, String type) {
 		double ans = 0;
-		for (long i = cin; i <= cout; i += (24*60*60*1000)) {
-			for (long start : publicPeakPeriods.values()) {
-				if (i >= start) {
-					if (publicPeakPeriods.get(start) <= i) {
-						ans += p*1.4;
-						break;
-					} else {
-						ans += p;
-						break;
-					}
-				}
-			}
-			String discQuery = "SELECT * FROM DISCOUNT";
-			Connection con = GetDbConnection();
-			PreparedStatement ps;
-			ResultSet rs;
-			try {
-				ps = con.prepareStatement(discQuery);
-				rs = ps.executeQuery();
-				
-				while (rs.next()) {
-					if (rs.getString("ROOMTYPE") == type) {
-						if ((getMillis(Integer.parseInt(rs.getString("STARTDATE"))) < i) &&
-						(getMillis(Integer.parseInt(rs.getString("ENDDATE"))) > i)) {
-							ans -= (double)Integer.parseInt(rs.getString("DISCOUNTRATE"))/100 * p;
+		DatabaseHandler2 dh = new DatabaseHandler2();
+		Connection con;
+		try {
+			con = dh.GetDbConnection();
+			
+			for (long i = cin; i <= cout; i += (24*60*60*1000)) {
+				for (long start : publicPeakPeriods.values()) {
+					if (i >= start) {
+						if (publicPeakPeriods.get(start) <= i) {
+							ans += p*1.4;
+							break;
+						} else {
+							ans += p;
+							break;
 						}
 					}
 				}
-			} catch (NumberFormatException | SQLException e) {
-				e.printStackTrace();
+				String discQuery = "SELECT * FROM DISCOUNT";
+				PreparedStatement ps;
+				ResultSet rs;
+				try {
+					ps = con.prepareStatement(discQuery);
+					rs = ps.executeQuery();
+					
+					while (rs.next()) {
+						if (rs.getString("ROOMTYPE") == type) {
+							if ((getMillis(Integer.parseInt(rs.getString("STARTDATE"))) < i) &&
+							(getMillis(Integer.parseInt(rs.getString("ENDDATE"))) > i)) {
+								ans -= (double)Integer.parseInt(rs.getString("DISCOUNTRATE"))/100 * p;
+							}
+						}
+					}
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 			}
+			dh.CloseDbConnection(con);
+		} catch (UnsupportedEncodingException | InstantiationException
+				| IllegalAccessException e1) {
+			e1.printStackTrace();
 		}
 		return ans;
 	}

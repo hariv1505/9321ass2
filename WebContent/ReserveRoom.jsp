@@ -37,7 +37,7 @@ for(String S:selectedItems){
 	BookingID=Integer.parseInt(tokens[9]);
 }
 
-Room=Room.replaceAll("\\s+","");
+//Room=Room.replaceAll("\\s+","");
 City=City.replaceAll("\\s+","");
 Customer=Customer.replaceAll("\\s+","");
 Custid=Custid.replaceAll("\\s+","");

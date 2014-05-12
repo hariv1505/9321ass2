@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import HelperClass.DatabaseHandler2;
 import HelperClass.Init;
 
 /**
@@ -77,11 +78,11 @@ public class EditBooking extends HttpServlet {
 		String qry = "SELECT * FROM BOOKINGS "
 				+ "WHERE ID = " + bookingID;
 		
-		LoadDbDriver();
-		Connection con = GetDbConnection();
 		PreparedStatement ps;
 		ResultSet rs;
 		try {
+			DatabaseHandler2 dh = new DatabaseHandler2();
+			Connection con =dh.GetDbConnection();
 			ps = con.prepareStatement(qry);
 			rs = ps.executeQuery();
 			rs.next();
@@ -107,7 +108,7 @@ public class EditBooking extends HttpServlet {
 						out.println("<h1>Sorry, you can only edit the page 48 hours prior to booking start.</h1>");
 					}
 				}
-				CloseDbConnection(con);
+				dh.CloseDbConnection(con);
 			} else if (pin == null && request.getParameter("type") != null) {
 				SearchRes sr = new SearchRes(rs.getLong("CHECKIN"), rs.getLong("CHECKOUT"),
 						rs.getInt("CITYID"));
@@ -117,8 +118,7 @@ public class EditBooking extends HttpServlet {
 				} else {
 					if (sr.getRes().get(request.getParameter("type")) > 0) {
 						String allRoomsQry = "SELECT * FROM ROOMTYPES";
-						LoadDbDriver();
-						con = GetDbConnection();
+						con = dh.GetDbConnection();
 						ps = con.prepareStatement(allRoomsQry);
 						ResultSet rsAll = ps.executeQuery();
 						rsAll.next();
@@ -128,6 +128,13 @@ public class EditBooking extends HttpServlet {
 						ps = con.prepareStatement(custQuery);
 						ResultSet rsCust = ps.executeQuery();
 						rsCust.next();
+						
+						String citiesQry = "SELECT * FROM CITIES";
+						con = dh.GetDbConnection();
+						ps = con.prepareStatement(citiesQry);
+						ResultSet rsCities = ps.executeQuery();
+						rsCities.next();
+						
 						out.println("<h1>New booking includes:</h1>");
 						out.println("<b>Email:</b> " + rsCust.getString("EMAIL").trim() + "<br/>");
 						out.println("<b>First name:</b> " + rsCust.getString("FIRSTNAME").trim() + "<br/>");
@@ -136,16 +143,13 @@ public class EditBooking extends HttpServlet {
 						out.println("<b>Checkin Time:</b> " + newB.getCheckInToString() + "<br/>");
 						out.println("<b>Checkout Time:</b> " + newB.getCheckOutToString() + "<br/>");
 						out.println("<b>Card to use</b>: " + rs.getLong("CARDNUM") + "<br/>");
+						out.println("<b>City:</b>" + rsCities.getString("CITY") + "<br/><br/>");
 						out.printf("<b>Regular total:</b> $%.2f<br/>", (newB.getTotalPrice() - newB.getPeakPrem() - newB.getDiscount()));
 						out.printf("<b>Peak total:</b> $%.2f<br/>",newB.getPeakPrem());
 						out.printf("<b>Discount total:</b> $%.2f<br/>", newB.getDiscount());
 						out.printf("<b>Total Price:</b> <u>$%.2f</u><br/><br/>", newB.getTotalPrice());
-						out.println("<b>Total price:</b>" + newB.getTotalPrice() + rs.getInt("FAIR") + "<br/>" );
-						String citiesQry = "SELECT * FROM CITIES";
-						ps = con.prepareStatement(citiesQry);
-						ResultSet rsCities = ps.executeQuery();
-						rsCities.next();
-						out.println("City is " + rsCities.getString("CITY") + "<br/><br/>");
+						out.printf("<b>Total overall price:</b> <u>$%.2f</u><br/><br/>", newB.getTotalPrice() + rs.getInt("FAIR"));
+						
 						out.println("<form action='ConfirmServlet' method='post'>");
 						out.println("<input type='submit' value='Accept'/>");
 						out.println("<input type='hidden' name='cardnum' value='" + rs.getLong("CARDNUM") + "'/>");
@@ -175,10 +179,12 @@ public class EditBooking extends HttpServlet {
 				out.println("<label for='PIN'>PIN</label><input type='number' name='PIN' />");
 				out.println("</form>");
 				out.println("<br/><br/>Incorrect password");
-				CloseDbConnection(con);
 			}
-		} catch (SQLException e) {
+			dh.CloseDbConnection(con);
+		} catch (SQLException | InstantiationException | IllegalAccessException e) {
 			out.println("Booking does not exist. Please log in again.");
+			out.println("<br/><form action='/group32'>" + 
+					"<input type='submit' value='Back to Search'></form>");
 			e.printStackTrace();
 		} finally {
 			out.println("</CENTER>");

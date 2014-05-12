@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import HelperClass.DatabaseHandler2;
 import HelperClass.Init;
 import HelperClass.MailSender;
 
@@ -70,7 +71,7 @@ public class Confirm extends HttpServlet {
 		
 		if (isError) {
 			session.setAttribute("isError", true);
-			response.sendRedirect("/Assignment2/ConsumerPage");
+			response.sendRedirect("/group32/ConsumerPage");
 			return;
 		}
 		
@@ -82,104 +83,113 @@ public class Confirm extends HttpServlet {
 		
 		String searchPersonQry = "SELECT COUNT(*) AS COUNT FROM CUSTOMERS " +
 				"WHERE EMAIL = '" + emailAdd + "'";
-		LoadDbDriver();
-		Connection con = GetDbConnection();
 		PreparedStatement ps;
 		ResultSet rs;
 		try {
-			ps = con.prepareStatement(searchPersonQry);
-			rs = ps.executeQuery();
-			if (rs.next()) {
-				int count = Integer.parseInt(rs.getString("COUNT").trim());
-				
-				if (count == 0) {
-					String addPersonQry = "INSERT INTO CUSTOMERS VALUES " +
-							"('" + emailAdd + "','" + firstN + "','" + lastN + "')";
-					ps = con.prepareStatement(addPersonQry);
-					ps.executeUpdate();
-				} else {
-					searchPersonQry = "SELECT * FROM CUSTOMERS " +
-							"WHERE EMAIL = '" + emailAdd + "'";
-					PreparedStatement psCheck = con.prepareStatement(searchPersonQry);
-					rs = psCheck.executeQuery();
-					if (rs.next()) {
-						if (!rs.getString("FIRSTNAME").trim().equals(firstN) || !rs.getString("LASTNAME").trim().equals(lastN)) {
-							out.println("Wrong user details.");
-							out.println("</CENTER>");
-							out.println("</BODY>"); 
-							out.println("</HTML>");
-							out.close();
-							return;
+			DatabaseHandler2 dh = new DatabaseHandler2();
+			Connection con = dh.GetDbConnection();
+			
+			try {
+				ps = con.prepareStatement(searchPersonQry);
+				rs = ps.executeQuery();
+				if (rs.next()) {
+					int count = Integer.parseInt(rs.getString("COUNT").trim());
+					
+					if (count == 0) {
+						String addPersonQry = "INSERT INTO CUSTOMERS VALUES " +
+								"('" + emailAdd + "','" + firstN + "','" + lastN + "')";
+						ps = con.prepareStatement(addPersonQry);
+						ps.executeUpdate();
+					} else {
+						searchPersonQry = "SELECT * FROM CUSTOMERS " +
+								"WHERE EMAIL = '" + emailAdd + "'";
+						PreparedStatement psCheck = con.prepareStatement(searchPersonQry);
+						rs = psCheck.executeQuery();
+						if (rs.next()) {
+							if (!rs.getString("FIRSTNAME").trim().equals(firstN) || !rs.getString("LASTNAME").trim().equals(lastN)) {
+								out.println("Wrong user details.");
+								out.println("</CENTER>");
+								out.println("</BODY>"); 
+								out.println("</HTML>");
+								out.close();
+								return;
+							}
 						}
 					}
 				}
+			} catch (SQLException e) {
+				out.println("Cannot add user.");
+				out.println("</CENTER>");
+				out.println("</BODY>"); 
+				out.println("</HTML>");
+				out.close();
+				return;
 			}
-		} catch (SQLException e) {
-			out.println("Cannot add user.");
-			out.println("</CENTER>");
-			out.println("</BODY>"); 
-			out.println("</HTML>");
-			out.close();
-			return;
-		}
+					
+			try {
+				String insertBookingQry =  "INSERT INTO BOOKINGS(CHECKIN, CHECKOUT,CUSTID,CITYID,ROOMTYPE,EXTRABED,CARDNUM,PIN,NUMROOMS,FAIR) " + 
+						"VALUES (" + b.getCheckIn() + "," + b.getCheckOut() + ",'" +
+						emailAdd + "'," + b.getCity() + ",'" + b.getType() + "'," + 
+						b.isExtraBed() + "," + cardNum + "," + pin + "," + b.getNumRooms() + "," + b.getTotalPrice() + ")";
+				con = dh.GetDbConnection();
+				ps = con.prepareStatement(insertBookingQry);
+				ps.executeUpdate();
 				
-		try {
-			String insertBookingQry =  "INSERT INTO BOOKINGS(CHECKIN, CHECKOUT,CUSTID,CITYID,ROOMTYPE,EXTRABED,CARDNUM,PIN,NUMROOMS,FAIR) " + 
-					"VALUES (" + b.getCheckIn() + "," + b.getCheckOut() + ",'" +
-					emailAdd + "'," + b.getCity() + ",'" + b.getType() + "'," + 
-					b.isExtraBed() + "," + cardNum + "," + pin + "," + b.getNumRooms() + "," + b.getTotalPrice() + ")";
-			System.out.println(insertBookingQry);
-			ps = con.prepareStatement(insertBookingQry);
-			ps.executeUpdate();
-			
-			String getBookingQry = "SELECT ID FROM BOOKINGS " + 
-					"WHERE CHECKIN = " + b.getCheckIn() + " AND CHECKOUT = " + b.getCheckOut() + 
-					" AND CUSTID = '" + emailAdd + "' AND CITYID = " + b.getCity() + 
-					" AND ROOMTYPE = '" + b.getType() + "' AND EXTRABED = " + b.isExtraBed() +
-					" AND CARDNUM = " + cardNum + " AND PIN = " + pin + " AND NUMROOMS = " + b.getNumRooms()
-					+ " AND FAIR = " + b.getTotalPrice();
-			System.out.println(getBookingQry);
-
-			ps = con.prepareStatement(getBookingQry);
-			rs = ps.executeQuery();
-			rs.next();
-			int bookingID = Integer.parseInt(rs.getString("ID"));
-			
-			out.println("<h1>Congratulations on your booking!</h1>");
-	
-			out.println("<br/><b>First Name:</b> " + firstN + "<br/>");
-			out.println("<br/><b>Last Name:</b> " + lastN + "<br/>");
-			out.println("<br/><b>Email Address (username):</b> " + emailAdd + "<br/>");
-			out.println("<br/><b>Type:</b> " + b.getType() + "<br/>");
-			out.println("<br/><b>City:</b> " + b.getCity() + "<br/>");
-			out.println("<b>Number of beds:</b> " + b.getNumBeds() + "<br/>");
-			out.println("<b>Number of rooms:</b> " + b.getNumRooms() + "<br/>");
-			out.println("<b>Price per night:</b> "+ b.getPricePerNight() + "<br/>");
-			out.println("<b>Check-in:</b> "+ b.getCheckInToString() + "<br/>");
-			out.println("<b>Check-out:</b> "+ b.getCheckOutToString() + "<br/>");
-			out.println("<b>Card Number:</b> " + cardNum + "<br/><br/>");
-			out.printf("<b>Regular total:</b> $%.2f<br/>", (b.getTotalPrice() - b.getPeakPrem() - b.getDiscount()));
-			out.printf("<b>Peak total:</b> $%.2f<br/>",b.getPeakPrem());
-			out.printf("<b>Discount total:</b> $%.2f<br/>", b.getDiscount());
-			out.printf("<b>Total Price:</b> <u>$%.2f</u><br/><br/>", b.getTotalPrice());
-			
-			out.println("Your details can be seen and edited (minimum 48 hours prior to check-in date)"
-					+ " at the following URL: "+ "<a href = /Assignment2/EditBooking?bookingID=" + bookingID + ">/Assignment2/EditBooking?bookingID=" + bookingID + "</a><br/>");
-			out.println("Your PIN is: " + pin + "<br/>");
-			out.println("We have sent an e-mail with these details.<br/><br/>");
-			
-			out.println("<br/><form action='/Assignment2'>" + 
-					"<input type='submit' value='Back to Start'></form>");
-			handleMail(request, response, emailAdd, firstN, lastN, bookingID, pin);
-		} catch (SQLException e) {
-			out.println("Cannot add booking.");
-			return;
+				String getBookingQry = "SELECT ID FROM BOOKINGS " + 
+						"WHERE CHECKIN = " + b.getCheckIn() + " AND CHECKOUT = " + b.getCheckOut() + 
+						" AND CUSTID = '" + emailAdd + "' AND CITYID = " + b.getCity() + 
+						" AND ROOMTYPE = '" + b.getType() + "' AND EXTRABED = " + b.isExtraBed() +
+						" AND CARDNUM = " + cardNum + " AND PIN = " + pin + " AND NUMROOMS = " + b.getNumRooms()
+						+ " AND FAIR = " + b.getTotalPrice();
+				System.out.println(getBookingQry);
+				
+				con = dh.GetDbConnection();
+				ps = con.prepareStatement(getBookingQry);
+				rs = ps.executeQuery();
+				rs.next();
+				int bookingID = Integer.parseInt(rs.getString("ID"));
+				
+				out.println("<h1>Congratulations on your booking!</h1>");
+		
+				out.println("<br/><b>First Name:</b> " + firstN + "<br/>");
+				out.println("<br/><b>Last Name:</b> " + lastN + "<br/>");
+				out.println("<br/><b>Email Address (username):</b> " + emailAdd + "<br/>");
+				out.println("<br/><b>Type:</b> " + b.getType() + "<br/>");
+				out.println("<br/><b>City:</b> " + b.getCity() + "<br/>");
+				out.println("<b>Number of beds:</b> " + b.getNumBeds() + "<br/>");
+				out.println("<b>Number of rooms:</b> " + b.getNumRooms() + "<br/>");
+				out.println("<b>Price per night:</b> "+ b.getPricePerNight() + "<br/>");
+				out.println("<b>Check-in:</b> "+ b.getCheckInToString() + "<br/>");
+				out.println("<b>Check-out:</b> "+ b.getCheckOutToString() + "<br/>");
+				out.println("<b>Card Number:</b> " + cardNum + "<br/><br/>");
+				out.printf("<b>Regular total:</b> $%.2f<br/>", (b.getTotalPrice() - b.getPeakPrem() - b.getDiscount()));
+				out.printf("<b>Peak total:</b> $%.2f<br/>",b.getPeakPrem());
+				out.printf("<b>Discount total:</b> $%.2f<br/>", b.getDiscount());
+				out.printf("<b>Total Price:</b> <u>$%.2f</u><br/><br/>", b.getTotalPrice());
+				
+				out.println("Your details can be seen and edited (minimum 48 hours prior to check-in date)"
+						+ " at the following URL: "+ "<a href = /group32/EditBooking?bookingID=" + bookingID + ">/group32/EditBooking?bookingID=" + bookingID + "</a><br/>");
+				out.println("Your PIN is: " + pin + "<br/>");
+				out.println("We have sent an e-mail with these details.<br/><br/>");
+				
+				out.println("<br/><form action='/Assignment2'>" + 
+						"<input type='submit' value='Back to Start'></form>");
+				handleMail(request, response, emailAdd, firstN, lastN, bookingID, pin);
+			} catch (SQLException e) {
+				e.printStackTrace();
+				out.println("Cannot add booking.");
+				out.println("<br/><form action='/group32'>" + 
+						"<input type='submit' value='Back to Search'></form>");
+				return;
+			}
+			dh.CloseDbConnection(con);
+		} catch (InstantiationError | InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
 		} finally {	
 			out.println("</CENTER>");
 			out.println("</BODY>"); 
 			out.println("</HTML>");
 			out.close();
-			CloseDbConnection(con);
 		}
 	}
 	
@@ -195,7 +205,7 @@ public class Confirm extends HttpServlet {
 		RequestDispatcher disp;
 		String msg = "Hi " + ",<br/>";
 		msg += "Your details can be seen and edited (minimum 48 hours prior to check-in date)"
-				+ " at the following URL: "+ "<a href = /Assignment2/EditBooking?bookingID=" + bookingID + ">/Assignment2/EditBooking?bookingID=" + bookingID + "</a><br/>";
+				+ " at the following URL: "+ "<a href = /group32/EditBooking?bookingID=" + bookingID + ">/group32/EditBooking?bookingID=" + bookingID + "</a><br/>";
 		msg += "Your PIN is: " + pin + "<br/>";
 		msg += "We have sent an e-mail with these details.<br/><br/>";
 		boolean isSuccess = false;

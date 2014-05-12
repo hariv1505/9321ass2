@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import HelperClass.DatabaseHandler2;
 import HelperClass.Init;
 
 /**
@@ -112,7 +113,7 @@ public class Search extends HttpServlet {
 		
 		if (isError) {
 			session.setAttribute("isError", true);
-			response.sendRedirect("/Assignment2/ConsumerPage");
+			response.sendRedirect("/group32/ConsumerPage");
 			return;
 		}
 		
@@ -147,9 +148,9 @@ public class Search extends HttpServlet {
 		Map<String, Integer> numberOfBeds = new HashMap<String, Integer>();
 		String searchQry = "SELECT * FROM ROOMS";
 		
-		LoadDbDriver();
-		Connection con = GetDbConnection();
 		try {
+			DatabaseHandler2 dh = new DatabaseHandler2();
+			Connection con = dh.GetDbConnection();
 			PreparedStatement ps = con.prepareStatement(searchQry);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
@@ -200,15 +201,17 @@ public class Search extends HttpServlet {
 			
 			out.println("</form><br/>");
 			
-			out.println("<br/><form action='/Assignment2'>" + 
+			out.println("<br/><form action='/group32'>" + 
 					"<input type='submit' value='Back to Search'></form>");
+			dh.CloseDbConnection(con);
 			
-		}  catch (SQLException e) {
+		}  catch (Exception e) {
 			out.println("Cannot connect to database.");
+			out.println("<br/><form action='/group32'>" + 
+					"<input type='submit' value='Back to Search'></form>");
 		}
-		CloseDbConnection(con);
 		
-		isError = (boolean) session.getAttribute("isError");
+		isError = (Boolean) session.getAttribute("isError");
 		
 		if (isError) {
 			out.println("Error in input");
